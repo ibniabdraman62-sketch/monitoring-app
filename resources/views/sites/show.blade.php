@@ -1,0 +1,229 @@
+@extends('layouts.monitoring')
+
+@section('title', $site->client_name)
+@section('subtitle', $site->url)
+
+@section('content')
+
+<!-- Infos + Actions -->
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px;">
+
+    <div class="card">
+        <div class="card-title">📋 Informations du site</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+                <div style="font-size:11px; color:#6B7280; margin-bottom:4px;">URL</div>
+                <a href="{{ $site->url }}" target="_blank" style="color:#818CF8;">{{ $site->url }}</a>
+            </div>
+            <div>
+                <div style="font-size:11px; color:#6B7280; margin-bottom:4px;">Statut</div>
+                @if($site->is_active)
+                    <span class="badge badge-green">● Actif</span>
+                @else
+                    <span class="badge badge-red">● Inactif</span>
+                @endif
+            </div>
+            <div>
+                <div style="font-size:11px; color:#6B7280; margin-bottom:4px;">Fréquence</div>
+                <span style="color:#fff; font-weight:600;">{{ $site->frequency_min }} min</span>
+            </div>
+            <div>
+                <div style="font-size:11px; color:#6B7280; margin-bottom:4px;">Seuil réponse</div>
+                <span style="color:#fff; font-weight:600;">{{ $site->response_threshold_ms }} ms</span>
+            </div>
+            <div>
+                <div style="font-size:11px; color:#6B7280; margin-bottom:4px;">SSL</div>
+                <span style="color:#10B981;">🔒 {{ $site->ssl_check ? 'Activé' : 'Désactivé' }}</span>
+            </div>
+            <div>
+                <div style="font-size:11px; color:#6B7280; margin-bottom:4px;">Ajouté le</div>
+                <span style="color:#9CA3AF; font-size:12px;">{{ $site->created_at->format('d/m/Y') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="card-title">⚡ Actions rapides</div>
+        <button onclick="checkNow({{ $site->id }})" class="btn-primary btn-success" style="width:100%; justify-content:center;">
+            <i class="fas fa-sync"></i> Vérifier maintenant
+        </button>
+        <a href="{{ route('sites.edit', $site) }}" class="btn-primary btn-warning" style="width:100%; justify-content:center;">
+            <i class="fas fa-edit"></i> Modifier
+        </a>
+        <a href="{{ route('rapports.generate', $site) }}" class="btn-primary" style="width:100%; justify-content:center;">
+            <i class="fas fa-file-pdf"></i> Générer rapport PDF
+        </a>
+        <form action="{{ route('sites.toggle', $site) }}" method="POST">
+            @csrf @method('PATCH')
+            <button type="submit" class="btn-primary {{ $site->is_active ? 'btn-danger' : 'btn-success' }}" style="width:100%; justify-content:center;">
+                <i class="fas fa-{{ $site->is_active ? 'pause' : 'play' }}"></i>
+                {{ $site->is_active ? 'Désactiver' : 'Activer' }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Graphique -->
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-title">📈 Temps de réponse — 24 dernières heures</div>
+    <canvas id="responseChart" height="80"></canvas>
+</div>
+
+<!-- Dernières vérifications -->
+<div class="table-wrapper" style="margin-bottom:24px;">
+    <div class="table-header">
+        <div style="font-size:15px; font-weight:600; color:#fff;">🔍 Dernières vérifications</div>
+        <span class="badge badge-blue">{{ $verifications->count() }} entrées</span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Date / Heure</th>
+                <th>HTTP</th>
+                <th>Temps</th>
+                <th>SSL</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($verifications as $v)
+            <tr>
+                <td style="color:#9CA3AF; font-size:12px;">
+                    {{ $v->checked_at->format('d/m/Y H:i:s') }}
+                </td>
+                <td>
+                    <span class="badge {{ $v->http_code == 200 ? 'badge-green' : 'badge-red' }}">
+                        {{ $v->http_code }}
+                    </span>
+                </td>
+                <td>
+                    <span style="color:{{ $v->response_time_ms > 2000 ? '#EF4444' : '#10B981' }}; font-weight:600;">
+                        {{ $v->response_time_ms }} ms
+                    </span>
+                </td>
+                <td>
+                    @if($v->ssl_valid)
+                        <span class="ssl-ok">🔒 Valide</span>
+                    @else
+                        <span class="ssl-danger">🔓 Invalide</span>
+                    @endif
+                </td>
+                <td>
+                    @if($v->is_up)
+                        <span class="badge badge-green">EN LIGNE</span>
+                    @else
+                        <span class="badge badge-red">HORS LIGNE</span>
+                    @endif
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5" style="text-align:center; padding:40px; color:#6B7280;">
+                    Aucune vérification encore effectuée.
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<!-- Incidents -->
+<div class="table-wrapper">
+    <div class="table-header">
+        <div style="font-size:15px; font-weight:600; color:#fff;">⚠️ Incidents récents</div>
+        <span class="badge badge-red">{{ $incidents->count() }} incidents</span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Début</th>
+                <th>Résolu</th>
+                <th>Durée</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($incidents as $incident)
+            <tr>
+                <td>
+                    <span class="badge {{ $incident->type == 'offline' ? 'badge-red' : 'badge-yellow' }}">
+                        {{ strtoupper($incident->type) }}
+                    </span>
+                </td>
+                <td style="color:#9CA3AF; font-size:12px;">
+                    {{ $incident->started_at->format('d/m/Y H:i') }}
+                </td>
+                <td style="color:#9CA3AF; font-size:12px;">
+                    {{ $incident->resolved_at ? $incident->resolved_at->format('d/m/Y H:i') : '—' }}
+                </td>
+                <td style="color:#F59E0B; font-weight:600;">
+                    {{ $incident->duration_min ? $incident->duration_min . ' min' : 'En cours' }}
+                </td>
+                <td>
+                    @if($incident->resolved_at)
+                        <span class="badge badge-green">✅ Résolu</span>
+                    @else
+                        <span class="badge badge-red">🔴 Actif</span>
+                    @endif
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5" style="text-align:center; padding:40px; color:#10B981;">
+                    ✅ Aucun incident détecté !
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const verifications = @json($verifications->map(fn($v) => [
+    'x' => $v->checked_at->format('H:i:s'),
+    'y' => $v->response_time_ms
+])->values());
+
+new Chart(document.getElementById('responseChart'), {
+    type: 'line',
+    data: {
+        datasets: [{
+            label: '{{ $site->client_name }}',
+            data: verifications,
+            borderColor: '#4F46E5',
+            backgroundColor: 'rgba(79,70,229,0.1)',
+            tension: 0.4, fill: true, pointRadius: 3,
+        }]
+    },
+    options: {
+        responsive: true,
+        parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+        plugins: { legend: { labels: { color: '#9CA3AF' } } },
+        scales: {
+            x: { ticks: { color: '#6B7280' }, grid: { color: '#1E2235' } },
+            y: { ticks: { color: '#6B7280' }, grid: { color: '#1E2235' }, beginAtZero: true }
+        }
+    }
+});
+
+function checkNow(siteId) {
+    const btn = event.target;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
+    btn.disabled = true;
+    fetch(`/sites/${siteId}/check-now`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert(`✅ Vérification effectuée !\nStatut : ${data.is_up ? '🟢 EN LIGNE' : '🔴 HORS LIGNE'}\nTemps : ${data.response_time} ms\nHTTP : ${data.http_code}`);
+        location.reload();
+    });
+}
+</script>
+
+@endsection

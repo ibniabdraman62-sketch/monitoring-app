@@ -1,0 +1,28 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Site extends Model {
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id', 'client_name', 'url',
+        'frequency_min', 'response_threshold_ms',
+        'ssl_check', 'is_active'
+    ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+    public function verifications() {
+        return $this->hasMany(Verification::class);
+    }
+    public function incidents() {
+        return $this->hasMany(Incident::class);
+    }
+    public function rapports() {
+        return $this->hasMany(Rapport::class);
+    }
+}
