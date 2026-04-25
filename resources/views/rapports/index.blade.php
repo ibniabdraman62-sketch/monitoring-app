@@ -35,7 +35,7 @@
         <tbody>
             @forelse($rapports as $rapport)
             <tr>
-                <td style="font-weight:600; color:#fff;">{{ $rapport->site->client_name }}</td>
+                <td style="font-weight:700; color:#0C3547;">{{ $rapport->site->client_name }}</td>
                 <td style="color:#9CA3AF; font-size:12px;">
                     {{ $rapport->period_start->format('d/m/Y') }} →
                     {{ $rapport->period_end->format('d/m/Y') }}
