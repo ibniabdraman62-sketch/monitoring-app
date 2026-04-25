@@ -12,7 +12,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', 'Arial', sans-serif; background: #F0F9FF; color: #0F172A; }
 
-        /* Sidebar */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
             background: linear-gradient(180deg, #0C3547 0%, #1697C2 100%);
@@ -64,7 +63,6 @@
         .sidebar-footer .user-name { font-size: 13px; font-weight: 700; color: #fff; }
         .sidebar-footer .user-role { font-size: 11px; color: rgba(255,255,255,0.5); }
 
-        /* Main */
         .main { margin-left: 240px; min-height: 100vh; }
         .topbar {
             background: #fff; border-bottom: 1px solid #E0F2FE;
@@ -76,7 +74,6 @@
         .topbar .subtitle { font-size: 13px; color: #64748B; margin-top: 2px; }
         .topbar-right { display: flex; align-items: center; gap: 12px; }
 
-        /* Buttons */
         .btn-primary {
             background: linear-gradient(135deg, #1697C2, #4BC3EB);
             color: #fff; padding: 9px 18px; border-radius: 9px;
@@ -92,7 +89,6 @@
 
         .content { padding: 32px; }
 
-        /* Status dots */
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
         .status-dot.online  { background: #10B981; animation: pulse-green 2s infinite; }
         .status-dot.offline { background: #EF4444; animation: pulse-red 2s infinite; }
@@ -109,7 +105,6 @@
             100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
 
-        /* Cards */
         .card {
             background: #fff; border: 1px solid #E0F2FE;
             border-radius: 14px; padding: 24px;
@@ -117,7 +112,6 @@
         }
         .card-title { font-size: 15px; font-weight: 700; color: #0C3547; margin-bottom: 16px; }
 
-        /* KPI */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
         .kpi-card {
             border-radius: 14px; padding: 24px; position: relative;
@@ -141,7 +135,6 @@
         .kpi-value { font-size: 42px; font-weight: 900; color: #fff; line-height: 1; }
         .kpi-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 36px; opacity: 0.2; color: #fff; }
 
-        /* Table */
         .table-wrapper {
             background: #fff; border: 1px solid #E0F2FE;
             border-radius: 14px; overflow: hidden;
@@ -163,7 +156,6 @@
         tbody tr:hover { background: #F0F9FF; }
         tbody td { padding: 14px 16px; font-size: 13px; color: #334155; }
 
-        /* Badges */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
         .badge-green  { background: #D1FAE5; color: #065F46; }
         .badge-red    { background: #FEE2E2; color: #991B1B; }
@@ -175,7 +167,6 @@
         .ssl-warn   { color: #D97706; font-weight: 700; }
         .ssl-danger { color: #DC2626; font-weight: 700; }
 
-        /* Alerts */
         .alert-success {
             background: #D1FAE5; border: 1px solid #6EE7B7;
             color: #065F46; padding: 12px 16px; border-radius: 10px;
@@ -188,7 +179,6 @@
             margin-bottom: 20px; font-weight: 600;
         }
 
-        /* Forms */
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
         .form-input {
@@ -199,7 +189,6 @@
         .form-input:focus { border-color: #1697C2; background: #fff; box-shadow: 0 0 0 3px rgba(22,151,194,0.1); }
         .form-error { color: #DC2626; font-size: 12px; margin-top: 4px; font-weight: 600; }
 
-        /* Live badge */
         .live-badge {
             display: inline-flex; align-items: center; gap: 6px;
             background: #FEE2E2; color: #DC2626;
@@ -210,9 +199,49 @@
             border-radius: 50%; animation: pulse-red 1s infinite;
         }
 
-        /* Uptime bar */
         .uptime-bar { height: 6px; background: #E0F2FE; border-radius: 3px; overflow: hidden; }
         .uptime-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #1697C2, #53EAFD); }
+
+        /* Chatbot bubble */
+        .chat-bubble {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 62px; height: 62px;
+            background: linear-gradient(135deg, #0C3547, #1697C2);
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; z-index: 9999;
+            box-shadow: 0 4px 24px rgba(22,151,194,0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .chat-bubble:hover {
+            transform: scale(1.12);
+            box-shadow: 0 8px 32px rgba(22,151,194,0.7);
+        }
+        .chat-bubble span { font-size: 28px; }
+
+        /* Tooltip chatbot */
+        .chat-tooltip {
+            position: fixed; bottom: 94px; right: 16px;
+            background: #0C3547; color: #fff;
+            padding: 10px 16px; border-radius: 12px;
+            font-size: 12px; font-weight: 600; z-index: 9998;
+            white-space: nowrap; pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            animation: fadeInTooltip 0.3s ease;
+        }
+        .chat-tooltip::after {
+            content: ''; position: absolute; bottom: -6px; right: 24px;
+            width: 12px; height: 12px; background: #0C3547;
+            transform: rotate(45deg);
+        }
+        .chat-tooltip-sub {
+            font-size: 10px; color: rgba(255,255,255,0.65);
+            margin-top: 2px; font-weight: 400;
+        }
+        @keyframes fadeInTooltip {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
         @media (max-width: 768px) {
             .sidebar { display: none; }
@@ -254,6 +283,13 @@
             <i class="fas fa-exclamation-triangle"></i> Incidents
         </a>
 
+        <div class="nav-section" style="margin-top:12px;">Intelligence IA</div>
+        <a href="https://abaloudjoko.app.n8n.cloud/webhook/6e561f26-caed-4b69-b2c5-d336f116079b/chat"
+           target="_blank"
+           class="nav-item">
+            <i class="fas fa-robot"></i> Assistant IA
+        </a>
+
         <div class="nav-section" style="margin-top:12px;">Compte</div>
         <a href="{{ route('profile.edit') }}" class="nav-item">
             <i class="fas fa-user-circle"></i> Profil
@@ -284,6 +320,17 @@
             <div class="subtitle">@yield('subtitle', 'Vue d\'ensemble du système')</div>
         </div>
         <div class="topbar-right">
+            <a href="https://abaloudjoko.app.n8n.cloud/webhook/6e561f26-caed-4b69-b2c5-d336f116079b/chat"
+               target="_blank"
+               style="display:inline-flex; align-items:center; gap:6px;
+                      background:linear-gradient(135deg,#0C3547,#1697C2);
+                      color:#fff; padding:7px 14px; border-radius:20px;
+                      font-size:12px; font-weight:700; text-decoration:none;
+                      box-shadow:0 2px 10px rgba(22,151,194,0.3); transition:all 0.2s;"
+               onmouseover="this.style.opacity='0.85'"
+               onmouseout="this.style.opacity='1'">
+                <i class="fas fa-robot"></i> Assistant IA
+            </a>
             <span class="live-badge"><span class="live-dot"></span> LIVE</span>
             <span style="font-size:12px; color:#64748B; font-weight:600;">
                 {{ now()->format('d/m/Y H:i:s') }}
@@ -306,6 +353,21 @@
         @yield('content')
     </div>
 </div>
+
+<!-- Chatbot bubble flottant -->
+<div id="chat-tooltip" class="chat-tooltip" style="display:none;">
+    🤖 MonitorPro Assistant IA
+    <div class="chat-tooltip-sub">Powered by Google Gemini</div>
+</div>
+
+<a href="https://abaloudjoko.app.n8n.cloud/webhook/6e561f26-caed-4b69-b2c5-d336f116079b/chat"
+   target="_blank"
+   class="chat-bubble"
+   onmouseover="document.getElementById('chat-tooltip').style.display='block'"
+   onmouseout="document.getElementById('chat-tooltip').style.display='none'"
+   title="MonitorPro Assistant IA">
+    <span>🤖</span>
+</a>
 
 </body>
 </html>
