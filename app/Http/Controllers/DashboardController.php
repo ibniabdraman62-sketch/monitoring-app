@@ -59,10 +59,14 @@ class DashboardController extends Controller
                 'checked_at'    => $lastVerif ? $lastVerif->checked_at->diffForHumans() : 'Jamais',
             ];
         });
+        // Récupérer le rapport IA
+        
+        $aiRapport = cache()->get('ai_rapport', null);
 
         return view('dashboard', compact(
-            'totalSites', 'activeSites', 'incidents',
-            'uptimeMoyen', 'graphData', 'sitesStatus'
-        ));
+    'totalSites', 'activeSites', 'incidents',
+    'uptimeMoyen', 'graphData', 'sitesStatus', 'aiRapport'
+    ));
+    
     }
 }

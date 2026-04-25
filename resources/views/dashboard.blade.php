@@ -290,4 +290,162 @@ function checkNow(siteId, btn) {
 }
 </script>
 
+<!-- ===== RAPPORT IA GEMINI ===== -->
+@if($aiRapport)
+<div style="margin-top:24px;">
+
+    <!-- Header gradient -->
+    <div style="background:linear-gradient(135deg, #0C3547 0%, #1697C2 100%);
+                border-radius:16px 16px 0 0; padding:22px 28px;
+                display:flex; align-items:center; gap:16px;">
+        <div style="width:50px; height:50px; background:rgba(255,255,255,0.15);
+                    border-radius:12px; display:flex; align-items:center;
+                    justify-content:center; font-size:26px; flex-shrink:0;">🤖</div>
+        <div style="flex:1;">
+            <div style="font-size:18px; font-weight:800; color:#fff; letter-spacing:0.3px;">
+                Rapport d'Analyse Intelligente — Google Gemini AI
+            </div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.65); margin-top:4px;">
+                Généré automatiquement via n8n Automation ·
+                @php
+                    try {
+                        echo \Carbon\Carbon::parse($aiRapport['generated_at'])->format('d/m/Y à H:i');
+                    } catch(\Exception $e) {
+                        echo $aiRapport['generated_at'] ?? now()->format('d/m/Y à H:i');
+                    }
+                @endphp
+            </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+            <span style="background:rgba(16,185,129,0.25); color:#6EE7B7;
+                         border:1px solid rgba(16,185,129,0.4);
+                         padding:5px 14px; border-radius:20px; font-size:11px; font-weight:700;">
+                ● LIVE
+            </span>
+            <span style="background:rgba(255,255,255,0.15); color:#fff;
+                         padding:5px 14px; border-radius:20px; font-size:11px; font-weight:700;">
+                Intelligence Artificielle
+            </span>
+        </div>
+    </div>
+
+    <!-- Barre info -->
+    <div style="background:#F0F9FF; padding:12px 28px; border-left:1px solid #E0F2FE;
+                border-right:1px solid #E0F2FE; border-bottom:1px solid #E0F2FE;
+                display:flex; align-items:center; gap:28px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:7px;">
+            <i class="fas fa-robot" style="color:#1697C2; font-size:13px;"></i>
+            <span style="font-size:12px; font-weight:600; color:#1697C2;">Modèle : Google Gemini Pro</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:7px;">
+            <i class="fas fa-database" style="color:#64748B; font-size:13px;"></i>
+            <span style="font-size:12px; font-weight:600; color:#64748B;">Source : API MonitorPro temps réel</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:7px;">
+            <i class="fas fa-clock" style="color:#64748B; font-size:13px;"></i>
+            <span style="font-size:12px; font-weight:600; color:#64748B;">Fréquence : Toutes les heures</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:7px;">
+            <i class="fas fa-globe" style="color:#64748B; font-size:13px;"></i>
+            <span style="font-size:12px; font-weight:600; color:#64748B;">Sites analysés : {{ $totalSites }}</span>
+        </div>
+        <div style="margin-left:auto;">
+            <button onclick="window.print()"
+                    style="background:linear-gradient(135deg,#1697C2,#4BC3EB); color:#fff;
+                           border:none; padding:7px 16px; border-radius:8px;
+                           font-size:11px; font-weight:700; cursor:pointer;">
+                <i class="fas fa-print"></i> Imprimer le rapport
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenu Markdown -->
+    <div style="background:#fff; border:1px solid #E0F2FE; border-top:none;
+                border-radius:0 0 16px 16px; overflow:hidden;">
+        <div id="ai-rapport-content"
+             style="padding:28px 32px; font-size:13.5px; color:#1e293b;
+                    line-height:1.9; max-height:620px; overflow-y:auto;">
+        </div>
+    </div>
+
+</div>
+
+<style>
+#ai-rapport-content h1 {
+    font-size:20px; font-weight:800; color:#0C3547;
+    border-bottom:3px solid #1697C2; padding-bottom:10px; margin:24px 0 14px;
+}
+#ai-rapport-content h2 {
+    font-size:16px; font-weight:700; color:#1697C2; margin:20px 0 10px;
+    padding-left:12px; border-left:4px solid #1697C2;
+}
+#ai-rapport-content h3 {
+    font-size:14px; font-weight:700; color:#0C3547; margin:16px 0 8px;
+}
+#ai-rapport-content h4 {
+    font-size:13px; font-weight:700; color:#334155; margin:12px 0 6px;
+}
+#ai-rapport-content p { margin:8px 0; color:#334155; }
+#ai-rapport-content ul, #ai-rapport-content ol {
+    padding-left:24px; margin:8px 0;
+}
+#ai-rapport-content li { margin:6px 0; color:#334155; }
+#ai-rapport-content strong { color:#0C3547; font-weight:700; }
+#ai-rapport-content em { color:#64748B; }
+#ai-rapport-content hr {
+    border:none; border-top:1px solid #E0F2FE; margin:20px 0;
+}
+#ai-rapport-content code {
+    background:#F0F9FF; color:#1697C2; padding:2px 6px;
+    border-radius:4px; font-size:12px;
+}
+#ai-rapport-content blockquote {
+    border-left:4px solid #1697C2; margin:12px 0;
+    padding:10px 16px; background:#F0F9FF;
+    border-radius:0 8px 8px 0; color:#1697C2; font-weight:600;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    marked.setOptions({ breaks: true, gfm: true });
+    const rapportText = @json($aiRapport['rapport'] ?? '');
+    document.getElementById('ai-rapport-content').innerHTML = marked.parse(rapportText);
+</script>
+
+@else
+
+<!-- Aucun rapport IA encore -->
+<div style="margin-top:24px; background:linear-gradient(135deg, #F0F9FF, #E0F2FE);
+            border:1px solid #BAE6FD; border-radius:16px; padding:48px 32px; text-align:center;">
+    <div style="width:72px; height:72px; background:linear-gradient(135deg,#1697C2,#53EAFD);
+                border-radius:18px; display:flex; align-items:center; justify-content:center;
+                font-size:32px; margin:0 auto 20px; box-shadow:0 8px 24px rgba(22,151,194,0.3);">
+        🤖
+    </div>
+    <div style="font-size:20px; font-weight:800; color:#0C3547; margin-bottom:10px;">
+        Analyse IA en cours de configuration
+    </div>
+    <div style="font-size:13px; color:#64748B; max-width:480px; margin:0 auto 24px; line-height:1.7;">
+        Le rapport intelligent Google Gemini sera généré automatiquement toutes les heures
+        via le workflow n8n. Aucune action requise de votre part.
+    </div>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <span style="background:#fff; color:#1697C2; border:1px solid #BAE6FD;
+                     padding:7px 18px; border-radius:20px; font-size:12px; font-weight:700;">
+            <i class="fas fa-robot"></i> Google Gemini Pro
+        </span>
+        <span style="background:#fff; color:#1697C2; border:1px solid #BAE6FD;
+                     padding:7px 18px; border-radius:20px; font-size:12px; font-weight:700;">
+            <i class="fas fa-project-diagram"></i> n8n Automation
+        </span>
+        <span style="background:#fff; color:#1697C2; border:1px solid #BAE6FD;
+                     padding:7px 18px; border-radius:20px; font-size:12px; font-weight:700;">
+            <i class="fas fa-clock"></i> Toutes les heures
+        </span>
+    </div>
+</div>
+
+@endif
+
 @endsection
