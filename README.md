@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📡 MonitorPro
+# MonitorPro
 ### Système Intelligent de Monitoring des Sites Web avec Alertes Automatiques
 
 [![Laravel](https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
@@ -8,113 +8,113 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![License](https://img.shields.io/badge/License-Academic-blue?style=for-the-badge)](LICENSE)
 
-> **Projet de Fin d'Études — Licence Informatique IRM**  
-> Faculté des Sciences et Techniques de Mohammedia (FSTM)  
-> Université Hassan II de Casablanca — 2026
+> **Projet de Fin d'Etudes — Licence Informatique IRM**
+> Faculte des Sciences et Techniques de Mohammedia (FSTM)
+> Universite Hassan II de Casablanca — 2026
 
 </div>
 
 ---
 
-## 📌 Présentation
+## Presentation
 
-**MonitorPro** est une application web développée dans le cadre d'un stage de fin d'études chez **Soft Seven Art**, agence digitale basée à Casablanca. Elle permet de surveiller en temps réel la disponibilité, le temps de réponse et la validité SSL des sites web clients, avec envoi automatique d'alertes par email en cas d'incident.
+**MonitorPro** est une application web developpee dans le cadre d'un stage de fin d'etudes chez **Soft Seven Art**, agence digitale basee a Casablanca. Elle permet de surveiller en temps reel la disponibilite, le temps de reponse et la validite SSL des sites web clients, avec envoi automatique d'alertes par email en cas d'incident.
 
-### 🎯 Objectifs
-- Surveiller automatiquement la disponibilité (uptime) des sites web
-- Mesurer les temps de réponse et détecter les ralentissements
-- Vérifier la validité des certificats SSL
+### Objectifs
+- Surveiller automatiquement la disponibilite (uptime) des sites web
+- Mesurer les temps de reponse et detecter les ralentissements
+- Verifier la validite des certificats SSL
 - Envoyer des alertes email automatiques en cas d'incident
-- Générer des rapports PDF hebdomadaires par client
+- Generer des rapports PDF hebdomadaires par client
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalites
 
-| Fonctionnalité | Description |
+| Fonctionnalite | Description |
 |---|---|
-| 📊 **Dashboard temps réel** | KPIs, graphiques Chart.js, donut uptime, auto-refresh 30s |
-| 🌐 **Surveillance HTTP/HTTPS** | Vérification automatique toutes les 5 minutes |
-| 🔒 **Vérification SSL** | Validité et date d'expiration des certificats |
-| ⚡ **Check Now** | Vérification instantanée à la demande |
-| 📧 **Alertes automatiques** | Email lors de panne, lenteur ou résolution |
-| 📈 **Historique uptime** | Barre de 30 dernières vérifications par site |
-| ⚠️ **Gestion incidents** | Timeline complète des incidents avec durée |
-| 📄 **Rapports PDF** | Génération et téléchargement de rapports hebdomadaires |
-| 👤 **Authentification** | Login sécurisé avec gestion de profil |
+| Dashboard temps reel | KPIs, graphiques Chart.js, donut uptime, auto-refresh 30s |
+| Surveillance HTTP/HTTPS | Verification automatique toutes les 5 minutes |
+| Verification SSL | Validite et date d'expiration des certificats |
+| Check Now | Verification instantanee a la demande |
+| Alertes automatiques | Email lors de panne, lenteur ou resolution |
+| Historique uptime | Barre de 30 dernieres verifications par site |
+| Gestion incidents | Timeline complete des incidents avec duree |
+| Rapports PDF | Generation et telechargement de rapports hebdomadaires |
+| Authentification | Login securise avec gestion de profil |
 
 ---
 
-## 🛠️ Stack Technique
+## Stack Technique
 
 ### Backend
-| Technologie | Version | Rôle |
+| Technologie | Version | Role |
 |---|---|---|
-| **Laravel** | 10.x | Framework PHP MVC |
-| **PHP** | 8.3 | Langage de programmation |
-| **MySQL** | 8.4 | Base de données relationnelle |
-| **Guzzle HTTP** | 7.x | Client HTTP pour le monitoring |
-| **DomPDF** | 3.1 | Génération de rapports PDF |
-| **Laravel Breeze** | 1.x | Authentification |
-| **Laravel Scheduler** | — | Automatisation des vérifications |
+| Laravel | 10.x | Framework PHP MVC |
+| PHP | 8.3 | Langage de programmation |
+| MySQL | 8.4 | Base de donnees relationnelle |
+| Guzzle HTTP | 7.x | Client HTTP pour le monitoring |
+| DomPDF | 3.1 | Generation de rapports PDF |
+| Laravel Breeze | 1.x | Authentification |
+| Laravel Scheduler | — | Automatisation des verifications |
 
 ### Frontend
-| Technologie | Version | Rôle |
+| Technologie | Version | Role |
 |---|---|---|
-| **Blade** | — | Moteur de templates Laravel |
-| **Tailwind CSS** | 3.x | Framework CSS |
-| **Chart.js** | Latest | Graphiques et visualisations |
-| **Font Awesome** | 6.5 | Icônes |
+| Blade | — | Moteur de templates Laravel |
+| Tailwind CSS | 3.x | Framework CSS |
+| Chart.js | Latest | Graphiques et visualisations |
+| Font Awesome | 6.5 | Icones |
 
 ### Services
-| Service | Rôle |
+| Service | Role |
 |---|---|
-| **Mailtrap** | Sandbox SMTP pour les tests |
-| **Gmail / Mailgun** | SMTP production |
-| **Laragon** | Environnement de développement local |
+| Mailtrap | Sandbox SMTP pour les tests |
+| Gmail / Mailgun | SMTP production |
+| Laragon | Environnement de developpement local |
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### Prérequis
+### Prerequis
 - [Laragon](https://laragon.org) (Apache + MySQL + PHP 8.x)
 - [Composer](https://getcomposer.org) 2.x
 - [Node.js](https://nodejs.org) 18+ et npm
 
-### Étapes d'installation
+### Etapes d'installation
 
 ```bash
-# 1. Cloner le dépôt
+# 1. Cloner le depot
 git clone https://github.com/ibniabdraman62-sketch/monitoring-app.git
 cd monitoring-app
 
-# 2. Installer les dépendances PHP
+# 2. Installer les dependances PHP
 composer install
 
-# 3. Installer les dépendances JavaScript et compiler
+# 3. Installer les dependances JavaScript et compiler
 npm install && npm run build
 
 # 4. Configurer l'environnement
 cp .env.example .env
 php artisan key:generate
 
-# 5. Configurer la base de données dans .env
+# 5. Configurer la base de donnees dans .env
 # DB_DATABASE=monitoring_db
 # DB_USERNAME=root
 # DB_PASSWORD=
 
-# 6. Créer la base de données "monitoring_db" dans MySQL
-# Puis exécuter les migrations
+# 6. Creer la base de donnees "monitoring_db" dans MySQL
+# Puis executer les migrations
 php artisan migrate
 
-# 7. Créer le compte administrateur
+# 7. Creer le compte administrateur
 php artisan db:seed --class=UserSeeder
 ```
 
 ### Configuration Email
 
-**Mode développement (Mailtrap) :**
+**Mode developpement (Mailtrap) :**
 ```env
 MAIL_MAILER=smtp
 MAIL_HOST=sandbox.smtp.mailtrap.io
@@ -138,12 +138,12 @@ MAIL_ENCRYPTION=tls
 
 ---
 
-## ▶️ Lancement
+## Lancement
 
 Ouvrir **deux terminaux** dans le dossier du projet :
 
 ```bash
-# Terminal 1 — Serveur de développement
+# Terminal 1 — Serveur de developpement
 php artisan serve
 # Application disponible sur http://127.0.0.1:8000
 
@@ -151,78 +151,78 @@ php artisan serve
 php artisan schedule:work
 ```
 
-> ⚠️ Le Terminal 2 doit rester ouvert en permanence pour que le monitoring automatique fonctionne.
+> Le Terminal 2 doit rester ouvert en permanence pour que le monitoring automatique fonctionne.
 
 ---
 
-## 🔐 Accès
+## Acces
 
-Les credentials sont configurés dans `database/seeders/UserSeeder.php`.
+Les credentials sont configures dans `database/seeders/UserSeeder.php`.
 
 ```bash
-# Pour créer ou réinitialiser le compte admin :
+# Pour creer ou reinitialiser le compte admin :
 php artisan db:seed --class=UserSeeder
 ```
 
-> 🔒 Pour des raisons de sécurité, les credentials ne sont pas affichés dans ce README.  
-> Consulter le fichier `UserSeeder.php` pour les modifier avant le déploiement.
+> Pour des raisons de securite, les credentials ne sont pas affiches dans ce README.
+> Consulter le fichier `UserSeeder.php` pour les modifier avant le deploiement.
 
 ---
 
-## 🗄️ Structure de la base de données
+## Structure de la base de donnees
 
 ```
 monitoring_db
-├── users              → Administrateurs du système
-├── sites              → Sites web à surveiller
-├── verifications      → Résultats de chaque vérification
-├── incidents          → Pannes et lenteurs détectées
-├── alertes            → Emails d'alertes envoyés
-├── rapports           → Rapports PDF générés
-└── ...                → Tables système Laravel
+├── users              → Administrateurs du systeme
+├── sites              → Sites web a surveiller
+├── verifications      → Resultats de chaque verification
+├── incidents          → Pannes et lenteurs detectees
+├── alertes            → Emails d'alertes envoyes
+├── rapports           → Rapports PDF generes
+└── ...                → Tables systeme Laravel
 ```
 
 ---
 
-## 📁 Structure du projet
+## Structure du projet
 
 ```
 monitoring-app/
 ├── app/
 │   ├── Http/Controllers/    → DashboardController, SiteController, RapportController...
 │   ├── Models/              → User, Site, Verification, Incident, Alerte, Rapport
-│   ├── Services/            → MonitoringService (logique de vérification)
-│   ├── Jobs/                → CheckSiteJob (tâche asynchrone)
+│   ├── Services/            → MonitoringService (logique de verification)
+│   ├── Jobs/                → CheckSiteJob (tache asynchrone)
 │   └── Console/             → Kernel.php (configuration du scheduler)
 ├── resources/views/         → Vues Blade (dashboard, sites, rapports, incidents)
 ├── database/
 │   ├── migrations/          → 9 migrations pour toutes les tables
 │   └── seeders/             → UserSeeder, DemoSeeder
-└── routes/web.php           → Définition de toutes les routes
+└── routes/web.php           → Definition de toutes les routes
 ```
 
 ---
 
-## 🔄 Architecture du monitoring
+## Architecture du monitoring
 
 ```
 Scheduler (chaque minute)
     └── CheckSiteJob (par site actif)
             └── MonitoringService::checkSite()
                     ├── Guzzle HTTP → GET request → http_code + response_time
-                    ├── OpenSSL → Vérification SSL + date expiration
-                    ├── MySQL → INSERT verifications
-                    └── Si incident détecté
-                            ├── MySQL → INSERT incidents
+                    ├── OpenSSL    → Verification SSL + date expiration
+                    ├── MySQL      → INSERT verifications
+                    └── Si incident detecte
+                            ├── MySQL        → INSERT incidents
                             └── AlerteService → Mail::raw() → SMTP
 ```
 
 ---
 
-## 📊 Commandes utiles
+## Commandes utiles
 
 ```bash
-# Vérifier tous les sites manuellement
+# Verifier tous les sites manuellement
 php artisan tinker
 >>> App\Models\Site::all()->each(fn($s) => (new App\Services\MonitoringService())->checkSite($s));
 
@@ -232,34 +232,52 @@ php artisan route:list
 # Vider les caches
 php artisan config:clear && php artisan cache:clear
 
-# Réinitialiser la base de données
+# Reinitialiser la base de donnees
 php artisan migrate:fresh --seed
 ```
 
 ---
-## 👨‍💻 Auteurs
+
+## Auteurs
 
 <div align="center">
 
-### 👤 ABDRAMAN IBNI Abdraman
-Étudiant en Licence Informatique — Spécialité IRM
-Faculté des Sciences et Techniques de Mohammedia (FSTM)
-📧 ibniabdraman62@gmail.com
-**Rôle : Développement Frontend et Intégration système**
+**ABDRAMAN IBNI ABDRAMAN**
+
+Etudiant en Licence Informatique — Specialite IRM
+
+Faculte des Sciences et Techniques de Mohammedia (FSTM)
+
+ibniabdraman62@gmail.com
+
+Role : Developpement Frontend et Integration systeme
 
 ---
 
-### 👤 ACHRAF MABROUK
-Étudiant en Licence Informatique — Spécialité IRM
-Faculté des Sciences et Techniques de Mohammedia (FSTM)
-**Rôle : Développement Backend et Base de données**
+**ACHRAF MABROUK**
+
+Etudiant en Licence Informatique — Specialite IRM
+
+Faculte des Sciences et Techniques de Mohammedia (FSTM)
+
+Role : Developpement Backend et Base de donnees
 
 ---
 
-🏢 Stage effectué chez **Soft Seven Art** — Casablanca, Maroc
+Stage effectue chez **Soft Seven Art** — Casablanca, Maroc
 
-**Encadrant académique :** Prof. Abdellah ADIB — FSTM
+**Encadrant academique :** Pr. Noureddine MOUMKINE — FSTM
 
-Université Hassan II de Casablanca
+noureddine.moumkine@fstm.ac.ma
+
+Universite Hassan II de Casablanca
+
+</div>
+
+---
+
+<div align="center">
+
+Projet realise dans le cadre du stage de fin d'etudes — Annee universitaire 2025-2026
 
 </div>
