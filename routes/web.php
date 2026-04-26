@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
@@ -9,6 +10,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
+
+Route::get('/chatbot', function() {
+    return view('chatbot.index');
+})->name('chatbot.index');
 
 Route::middleware(['auth'])->group(function () {
 

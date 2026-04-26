@@ -32,7 +32,7 @@
         .sidebar-logo span { font-size: 17px; font-weight: 800; color: #fff; }
         .sidebar-logo small { font-size: 10px; color: rgba(255,255,255,0.6); display: block; margin-top: 2px; }
 
-        .sidebar-nav { flex: 1; padding: 16px 12px; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
         .nav-section {
             font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
             text-transform: uppercase; letter-spacing: 1.5px; padding: 10px 8px 4px;
@@ -49,6 +49,26 @@
             box-shadow: 0 4px 12px rgba(83,234,253,0.4);
         }
         .nav-item i { width: 18px; text-align: center; font-size: 14px; }
+
+        /* Badge IA dans sidebar */
+        .nav-item-ia {
+            display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+            border-radius: 10px; text-decoration: none;
+            font-size: 14px; font-weight: 700; margin-bottom: 3px; transition: all 0.2s;
+            background: linear-gradient(135deg, rgba(83,234,253,0.2), rgba(75,195,235,0.2));
+            border: 1px solid rgba(83,234,253,0.3);
+            color: #53EAFD;
+        }
+        .nav-item-ia:hover {
+            background: linear-gradient(135deg, rgba(83,234,253,0.35), rgba(75,195,235,0.35));
+            color: #fff; transform: translateX(2px);
+        }
+        .nav-item-ia i { width: 18px; text-align: center; font-size: 14px; }
+        .ia-badge {
+            margin-left: auto; background: #53EAFD; color: #0C3547;
+            font-size: 9px; font-weight: 800; padding: 2px 7px;
+            border-radius: 10px; letter-spacing: 0.5px;
+        }
 
         .sidebar-footer {
             padding: 16px; border-top: 1px solid rgba(255,255,255,0.15);
@@ -205,42 +225,36 @@
         /* Chatbot bubble */
         .chat-bubble {
             position: fixed; bottom: 24px; right: 24px;
-            width: 62px; height: 62px;
+            width: 64px; height: 64px;
             background: linear-gradient(135deg, #0C3547, #1697C2);
             border-radius: 50%; display: flex; align-items: center;
             justify-content: center; cursor: pointer; z-index: 9999;
             box-shadow: 0 4px 24px rgba(22,151,194,0.6);
             transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
+            text-decoration: none; border: 2px solid rgba(83,234,253,0.4);
         }
         .chat-bubble:hover {
             transform: scale(1.12);
-            box-shadow: 0 8px 32px rgba(22,151,194,0.7);
+            box-shadow: 0 8px 32px rgba(22,151,194,0.8);
         }
         .chat-bubble span { font-size: 28px; }
 
-        /* Tooltip chatbot */
         .chat-tooltip {
-            position: fixed; bottom: 94px; right: 16px;
+            position: fixed; bottom: 96px; right: 14px;
             background: #0C3547; color: #fff;
             padding: 10px 16px; border-radius: 12px;
             font-size: 12px; font-weight: 600; z-index: 9998;
             white-space: nowrap; pointer-events: none;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            animation: fadeInTooltip 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         }
         .chat-tooltip::after {
-            content: ''; position: absolute; bottom: -6px; right: 24px;
+            content: ''; position: absolute; bottom: -6px; right: 26px;
             width: 12px; height: 12px; background: #0C3547;
             transform: rotate(45deg);
         }
         .chat-tooltip-sub {
-            font-size: 10px; color: rgba(255,255,255,0.65);
-            margin-top: 2px; font-weight: 400;
-        }
-        @keyframes fadeInTooltip {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: translateY(0); }
+            font-size: 10px; color: #53EAFD;
+            margin-top: 2px; font-weight: 500;
         }
 
         @media (max-width: 768px) {
@@ -284,9 +298,8 @@
         </a>
 
         <div class="nav-section" style="margin-top:12px;">Intelligence IA</div>
-        <a href="https://abaloudjoko.app.n8n.cloud/webhook/6e561f26-caed-4b69-b2c5-d336f116079b/chat"
-           target="_blank"
-           class="nav-item">
+        <a href="{{ route('chatbot.index') }}"
+           class="nav-item {{ request()->routeIs('chatbot.*') ? 'active' : '' }}">
             <i class="fas fa-robot"></i> Assistant IA
         </a>
 
@@ -320,16 +333,19 @@
             <div class="subtitle">@yield('subtitle', 'Vue d\'ensemble du système')</div>
         </div>
         <div class="topbar-right">
-            <a href="https://abaloudjoko.app.n8n.cloud/webhook/6e561f26-caed-4b69-b2c5-d336f116079b/chat"
-               target="_blank"
-               style="display:inline-flex; align-items:center; gap:6px;
+            <a href="{{ route('chatbot.index') }}"
+               style="display:inline-flex; align-items:center; gap:7px;
                       background:linear-gradient(135deg,#0C3547,#1697C2);
-                      color:#fff; padding:7px 14px; border-radius:20px;
+                      color:#fff; padding:8px 16px; border-radius:20px;
                       font-size:12px; font-weight:700; text-decoration:none;
-                      box-shadow:0 2px 10px rgba(22,151,194,0.3); transition:all 0.2s;"
+                      box-shadow:0 2px 10px rgba(22,151,194,0.4); transition:all 0.2s;"
                onmouseover="this.style.opacity='0.85'"
                onmouseout="this.style.opacity='1'">
                 <i class="fas fa-robot"></i> Assistant IA
+                <span style="background:#53EAFD; color:#0C3547; font-size:9px;
+                             font-weight:800; padding:2px 7px; border-radius:10px;">
+                    GEMINI
+                </span>
             </a>
             <span class="live-badge"><span class="live-dot"></span> LIVE</span>
             <span style="font-size:12px; color:#64748B; font-weight:600;">
@@ -357,15 +373,14 @@
 <!-- Chatbot bubble flottant -->
 <div id="chat-tooltip" class="chat-tooltip" style="display:none;">
     🤖 MonitorPro Assistant IA
-    <div class="chat-tooltip-sub">Powered by Google Gemini</div>
+    <div class="chat-tooltip-sub">Powered by Google Gemini 2.5</div>
 </div>
 
-<a href="https://abaloudjoko.app.n8n.cloud/webhook/6e561f26-caed-4b69-b2c5-d336f116079b/chat"
-   target="_blank"
+<a href="{{ route('chatbot.index') }}"
    class="chat-bubble"
    onmouseover="document.getElementById('chat-tooltip').style.display='block'"
    onmouseout="document.getElementById('chat-tooltip').style.display='none'"
-   title="MonitorPro Assistant IA">
+   title="MonitorPro Assistant IA — Gemini">
     <span>🤖</span>
 </a>
 
