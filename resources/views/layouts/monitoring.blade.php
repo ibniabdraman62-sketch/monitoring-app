@@ -376,19 +376,24 @@
     </div>
 </div>
 
-<!-- Chatbot bubble flottant -->
+<!-- Chatbot bubble flottant amélioré -->
 <div id="chat-tooltip" class="chat-tooltip" style="display:none;">
-    🤖 MonitorPro Assistant IA
-    <div class="chat-tooltip-sub">Powered by Google Gemini 2.5</div>
+    MonitorPro Assistant IA
+    <div class="chat-tooltip-sub">Powered by Google Gemini 2.5 Flash</div>
 </div>
 
 <a href="{{ route('chatbot.index') }}"
    class="chat-bubble"
-   onmouseover="document.getElementById('chat-tooltip').style.display='block'"
-   onmouseout="document.getElementById('chat-tooltip').style.display='none'"
-   title="MonitorPro Assistant IA — Gemini">
-    <span>🤖</span>
+   onmouseover="this.style.transform='scale(1.15)'; document.getElementById('chat-tooltip').style.display='block'"
+   onmouseout="this.style.transform='scale(1)'; document.getElementById('chat-tooltip').style.display='none'"
+   title="MonitorPro Assistant IA">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="14" r="9" fill="white" opacity="0.95"/>
+        <rect x="7" y="20" width="6" height="6" rx="1" fill="white" opacity="0.95"/>
+        <circle cx="12" cy="14" r="2" fill="#1697C2"/>
+        <circle cx="20" cy="14" r="2" fill="#1697C2"/>
+        <path d="M12 18 Q16 21 20 18" stroke="#1697C2" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    </svg>
 </a>
-
 </body>
 </html>
