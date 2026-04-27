@@ -3,39 +3,42 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Site;
 use App\Models\CronLog;
-use App\Services\MonitoringService;
 
-class CheckUptimeCommand extends Command {
-    protected $signature   = 'monitor:check-uptime';
-    protected $description = 'Vérifie la disponibilité de tous les sites actifs';
+class CheckSslCommand extends Command {
+    protected $signature   = 'monitor:check-ssl';
+    protected $description = 'Vérifie les certificats SSL de tous les sites actifs';
 
     public function handle(): void {
         $start = now();
-        $sites = Site::where('is_active', true)->get();
-        $errors = 0;
-        $errorMsg = '';
-        $service = new MonitoringService();
+        $sites = Site::where('is_active', true)->where('ssl_check', true)->get();
+        $errors = 0; $errorMsg = '';
 
         foreach ($sites as $site) {
             try {
-                $service->checkSite($site);
-                $this->line("OK: {$site->client_name}");
+                $lastVerif = $site->verifications()->latest('checked_at')->first();
+                if ($lastVerif && $lastVerif->ssl_expires_at) {
+                    $daysLeft = now()->diffInDays($lastVerif->ssl_expires_at, false);
+                    if ($daysLeft <= 30 && $daysLeft >= 0) {
+                        $emails = $site->notify_emails ? explode(',', $site->notify_emails) : [config('mail.from.address')];
+                        foreach ($emails as $email) {
+                            \Illuminate\Support\Facades\Mail::raw(
+                                "ALERTE SSL — {$site->client_name}\nSSL expire dans {$daysLeft} jours.\nURL: {$site->url}\n-- MonitorPro",
+                                fn($m) => $m->to(trim($email))->subject("SSL expire bientot — {$site->client_name}")
+                            );
+                        }
+                    }
+                }
+                $this->line("OK SSL: {$site->client_name}");
             } catch (\Exception $e) {
-                $errors++;
-                $errorMsg .= "{$site->client_name}: {$e->getMessage()}\n";
-                $this->warn("ERR: {$site->client_name}");
+                $errors++; $errorMsg .= "{$site->client_name}: {$e->getMessage()}\n";
             }
         }
 
         CronLog::create([
-            'command'       => 'monitor:check-uptime',
-            'status'        => $errors === 0 ? 'success' : 'error',
-            'duration_ms'   => now()->diffInMilliseconds($start),
-            'sites_checked' => $sites->count(),
-            'errors_count'  => $errors,
-            'error_message' => $errorMsg ?: null,
-            'executed_at'   => now(),
+            'command' => 'monitor:check-ssl', 'status' => $errors === 0 ? 'success' : 'error',
+            'duration_ms' => now()->diffInMilliseconds($start), 'sites_checked' => $sites->count(),
+            'errors_count' => $errors, 'error_message' => $errorMsg ?: null, 'executed_at' => now(),
         ]);
-        $this->info("Uptime vérifié : {$sites->count()} sites, {$errors} erreurs.");
+        $this->info("SSL verifie : {$sites->count()} sites, {$errors} erreurs.");
     }
 }

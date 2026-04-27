@@ -15,13 +15,10 @@ class CleanupOldDataCommand extends Command {
         $archived = Incident::whereNotNull('resolved_at')->where('resolved_at', '<', now()->subDays(90))->count();
 
         CronLog::create([
-            'command'       => 'monitor:cleanup',
-            'status'        => 'success',
-            'duration_ms'   => now()->diffInMilliseconds($start),
-            'sites_checked' => $deleted,
-            'errors_count'  => 0,
-            'executed_at'   => now(),
+            'command' => 'monitor:cleanup', 'status' => 'success',
+            'duration_ms' => now()->diffInMilliseconds($start), 'sites_checked' => $deleted,
+            'errors_count' => 0, 'error_message' => null, 'executed_at' => now(),
         ]);
-        $this->info("{$deleted} vérifications supprimées. {$archived} incidents archivés.");
+        $this->info("{$deleted} verifications supprimees. {$archived} incidents archives.");
     }
 }
