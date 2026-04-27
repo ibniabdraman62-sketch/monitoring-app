@@ -57,6 +57,18 @@
             </div>
 
             <div style="display:flex; gap:10px; margin-top:8px;">
+                <div class="form-group">
+    <label class="form-label">
+        <i class="fas fa-envelope" style="color:#1697C2;"></i>
+        Emails de notification
+    </label>
+    <input type="text" name="notify_emails" class="form-input"
+           placeholder="email1@exemple.com, email2@exemple.com"
+           value="{{ old('notify_emails', $site->notify_emails) }}">
+    <div style="font-size:11px; color:#64748B; margin-top:4px;">
+        Séparez plusieurs emails par des virgules
+    </div>
+</div>
                 <button type="submit" class="btn-primary btn-success">
                     <i class="fas fa-save"></i> Enregistrer
                 </button>

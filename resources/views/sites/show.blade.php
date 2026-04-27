@@ -225,5 +225,67 @@ function checkNow(siteId) {
     });
 }
 </script>
+<!-- Bloc WHOIS Domaine -->
+<div class="card" style="margin-top:16px;">
+    <div class="card-title">
+        <i class="fas fa-globe" style="color:#1697C2;"></i>
+        Informations WHOIS — Domaine
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+        <div style="text-align:center; padding:16px; background:#F0F9FF; border-radius:10px;">
+            <div style="font-size:16px; font-weight:800; color:#0C3547;">
+                {{ $site->domain_registrar ?? '—' }}
+            </div>
+            <div style="font-size:11px; color:#64748B; margin-top:4px; font-weight:600;">REGISTRAR</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:#F0F9FF; border-radius:10px;">
+            @php
+                $domainDaysLeft = $site->domain_expires_at
+                    ? now()->diffInDays(\Carbon\Carbon::parse($site->domain_expires_at), false)
+                    : null;
+            @endphp
+            <div style="font-size:16px; font-weight:800;
+                color:{{ $domainDaysLeft !== null ? ($domainDaysLeft <= 7 ? '#DC2626' : ($domainDaysLeft <= 30 ? '#D97706' : '#059669')) : '#94A3B8' }}">
+                {{ $site->domain_expires_at
+                    ? \Carbon\Carbon::parse($site->domain_expires_at)->format('d/m/Y')
+                    : '—' }}
+            </div>
+            <div style="font-size:11px; color:#64748B; margin-top:4px; font-weight:600;">EXPIRATION DOMAINE</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:#F0F9FF; border-radius:10px;">
+            <div style="font-size:16px; font-weight:800; color:#0C3547;">
+                {{ $site->domain_created_at
+                    ? \Carbon\Carbon::parse($site->domain_created_at)->format('d/m/Y')
+                    : '—' }}
+            </div>
+            <div style="font-size:11px; color:#64748B; margin-top:4px; font-weight:600;">DATE CRÉATION</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:#F0F9FF; border-radius:10px;">
+            @if($domainDaysLeft !== null)
+                <span class="badge {{ $domainDaysLeft <= 7 ? 'badge-red' : ($domainDaysLeft <= 30 ? 'badge-yellow' : 'badge-green') }}"
+                      style="font-size:13px; padding:6px 14px;">
+                    {{ $domainDaysLeft > 0 ? $domainDaysLeft.'j restants' : 'EXPIRÉ' }}
+                </span>
+            @else
+                <span style="color:#94A3B8; font-size:16px; font-weight:800;">—</span>
+            @endif
+            <div style="font-size:11px; color:#64748B; margin-top:8px; font-weight:600;">STATUT</div>
+        </div>
+    </div>
 
+    <div style="margin-top:16px; padding:12px 16px; background:#FEF3C7;
+                border-radius:8px; border-left:4px solid #D97706;
+                display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-info-circle" style="color:#D97706;"></i>
+        <span style="font-size:12px; color:#92400E; font-weight:600;">
+            Les données WHOIS sont mises à jour automatiquement chaque semaine via le Cron Job
+            <code>monitor:check-whois</code>.
+            @if($site->whois_checked_at)
+                Dernière vérification : {{ \Carbon\Carbon::parse($site->whois_checked_at)->format('d/m/Y à H:i') }}
+            @else
+                Aucune vérification WHOIS effectuée encore.
+            @endif
+        </span>
+    </div>
+</div>
 @endsection

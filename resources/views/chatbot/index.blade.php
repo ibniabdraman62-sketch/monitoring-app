@@ -4,6 +4,30 @@
 
 @section('content')
 
+<!-- Barre de recherche -->
+<div class="card" style="margin-bottom:16px; padding:16px 24px;">
+    <form method="GET" action="{{ route('sites.index') }}"
+          style="display:flex; gap:12px; align-items:center;">
+        <div style="flex:1; position:relative;">
+            <i class="fas fa-search" style="position:absolute; left:12px; top:50%;
+               transform:translateY(-50%); color:#94A3B8;"></i>
+            <input type="text" name="search"
+                   value="{{ request('search') }}"
+                   placeholder="Rechercher par nom client ou URL..."
+                   class="form-input" style="padding-left:36px;">
+        </div>
+        <button type="submit" class="btn-primary">
+            <i class="fas fa-search"></i> Rechercher
+        </button>
+        @if(request('search'))
+        <a href="{{ route('sites.index') }}" class="btn-primary btn-danger">
+            <i class="fas fa-times"></i> Effacer
+        </a>
+        @endif
+    </form>
+</div>
+
+
 <div style="display:grid; grid-template-columns:1fr 2fr; gap:24px;">
 
     <!-- Panneau gauche — Suggestions -->

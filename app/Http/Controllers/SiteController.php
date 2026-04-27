@@ -9,7 +9,13 @@ use Illuminate\Support\Facades\Auth;
 class SiteController extends Controller
 {
     public function index() {
-        $sites = Site::where('user_id', Auth::id())->get();
+        $search = request('search');
+$sites = Site::where('user_id', Auth::id())
+    ->when($search, function($q) use ($search) {
+        $q->where('client_name', 'LIKE', "%{$search}%")
+          ->orWhere('url', 'LIKE', "%{$search}%");
+    })
+    ->get();
         return view('sites.index', compact('sites'));
     }
 
@@ -33,6 +39,7 @@ class SiteController extends Controller
             'response_threshold_ms' => $request->response_threshold_ms,
             'ssl_check'    => $request->has('ssl_check'),
             'is_active'    => true,
+            'notify_emails' => $request->notify_emails,
         ]);
 
         return redirect()->route('sites.index')
@@ -65,6 +72,7 @@ class SiteController extends Controller
             'frequency_min' => $request->frequency_min,
             'response_threshold_ms' => $request->response_threshold_ms,
             'ssl_check'    => $request->has('ssl_check'),
+            'notify_emails' => $request->notify_emails,
         ]);
 
         return redirect()->route('sites.index')
