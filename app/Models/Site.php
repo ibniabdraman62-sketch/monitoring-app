@@ -15,8 +15,13 @@ class Site extends Model {
         'domain_expires_at',
         'domain_created_at',
         'whois_checked_at',
-        'notify_emails'
+        'notify_emails',
+        'client_email',
+        'whois_check'
     ];
+    public function whoisInfo() {
+    return $this->hasOne(\App\Models\WhoisInfo::class);
+}
 
     public function user() {
         return $this->belongsTo(User::class);

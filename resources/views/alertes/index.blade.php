@@ -64,6 +64,10 @@
         </select>
         <button type="submit" class="btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
         <a href="{{ route('alertes.index') }}" class="btn-primary btn-danger"><i class="fas fa-times"></i> Effacer</a>
+        <input type="date" name="date_from" class="form-input" style="width:160px;"
+       value="{{ request('date_from') }}" placeholder="Du">
+<input type="date" name="date_to" class="form-input" style="width:160px;"
+       value="{{ request('date_to') }}" placeholder="Au">
     </form>
 </div>
 

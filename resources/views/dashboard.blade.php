@@ -269,6 +269,24 @@ new Chart(document.getElementById('uptimeDonut'), {
     }
 });
 
+<!-- Disponibilité mois en cours -->
+<div class="card" style="margin-bottom:24px; padding:16px 24px;
+     display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#F0F9FF,#E0F2FE);">
+    <i class="fas fa-calendar-check" style="font-size:28px; color:#1697C2;"></i>
+    <div>
+        <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase;">
+            Disponibilité globale — mois en cours ({{ now()->format('F Y') }})
+        </div>
+        <div style="font-size:28px; font-weight:900;
+            color:{{ $uptimeMois >= 99 ? '#059669' : ($uptimeMois >= 95 ? '#D97706' : '#DC2626') }}">
+            {{ $uptimeMois }}%
+        </div>
+    </div>
+    <div style="margin-left:auto; text-align:right;">
+        <div style="font-size:12px; color:#64748B;">Calculé sur {{ now()->daysInMonth }} jours</div>
+    </div>
+</div>
+
 // Countdown refresh
 let countdown = 30;
 const el = document.getElementById('countdown');

@@ -67,6 +67,14 @@ class DashboardController extends Controller
     'totalSites', 'activeSites', 'incidents',
     'uptimeMoyen', 'graphData', 'sitesStatus', 'aiRapport'
     ));
+
+    // Disponibilité mois en cours
+$totalMois = \App\Models\Verification::whereIn('site_id', $sitesIds)
+    ->where('created_at', '>=', now()->startOfMonth())->count();
+$upMois = \App\Models\Verification::whereIn('site_id', $sitesIds)
+    ->where('created_at', '>=', now()->startOfMonth())
+    ->where('is_up', true)->count();
+$uptimeMois = $totalMois > 0 ? round($upMois / $totalMois * 100, 1) : 100;
     
     }
 }

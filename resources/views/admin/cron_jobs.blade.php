@@ -1,3 +1,32 @@
+
+
+@php
+    $lastLog = App\Models\CronLog::latest('executed_at')->first();
+    $schedulerActif = $lastLog && $lastLog->executed_at->diffInMinutes(now()) < 10;
+@endphp
+<div class="card" style="margin-bottom:24px; display:flex; align-items:center; gap:16px;
+     background:{{ $schedulerActif ? 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' : 'linear-gradient(135deg,#FEE2E2,#FECACA)' }};
+     border:1px solid {{ $schedulerActif ? '#6EE7B7' : '#FCA5A5' }};">
+    <div style="width:48px; height:48px; border-radius:50%;
+                background:{{ $schedulerActif ? '#059669' : '#DC2626' }};
+                display:flex; align-items:center; justify-content:center;">
+        <i class="fas fa-{{ $schedulerActif ? 'check' : 'times' }}" style="color:#fff; font-size:20px;"></i>
+    </div>
+    <div>
+        <div style="font-size:15px; font-weight:800;
+                    color:{{ $schedulerActif ? '#065F46' : '#991B1B' }}">
+            Scheduler Laravel : {{ $schedulerActif ? '✅ ACTIF' : '⚠️ INACTIF' }}
+        </div>
+        <div style="font-size:12px; color:#64748B;">
+            @if($lastLog)
+                Dernière exécution : {{ $lastLog->executed_at->diffForHumans() }} ({{ $lastLog->command }})
+            @else
+                Aucune exécution enregistrée — lancez "php artisan schedule:work" dans un terminal
+            @endif
+        </div>
+    </div>
+</div>
+
 @extends('layouts.monitoring')
 @section('title', 'Supervision Cron Jobs')
 @section('subtitle', 'Tableau de bord Super Admin — 5 Cron Jobs actifs')

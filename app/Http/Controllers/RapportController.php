@@ -3,78 +3,77 @@ namespace App\Http\Controllers;
 
 use App\Models\Site;
 use App\Models\Rapport;
-use App\Models\Verification;
-use App\Models\Incident;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 
-class RapportController extends Controller
-{
-    public function index()
-    {
-        $rapports = Rapport::whereHas('site', function($q) {
-            $q->where('user_id', Auth::id());
-        })->with('site')->latest()->get();
+class RapportController extends Controller {
 
-        return view('rapports.index', compact('rapports'));
+    public function index() {
+        $sites   = Site::where('user_id', auth()->id())->get();
+        $rapports = Rapport::with('site')
+            ->whereHas('site', fn($q) => $q->where('user_id', auth()->id()))
+            ->latest('generated_at')->get();
+        return view('rapports.index', compact('sites', 'rapports'));
     }
 
-    public function generate(Site $site)
-    {
-        $periodStart = Carbon::now()->subDays(7)->startOfDay();
-        $periodEnd   = Carbon::now()->endOfDay();
+    public function generate(Request $request, Site $site) {
+        $verifications = $site->verifications()
+            ->where('created_at', '>=', now()->subDays(30))
+            ->orderBy('checked_at', 'desc')->get();
 
-        // Calcul uptime
-        $verifications = Verification::where('site_id', $site->id)
-            ->whereBetween('created_at', [$periodStart, $periodEnd])
-            ->get();
+        $total    = $verifications->count();
+        $up       = $verifications->where('is_up', true)->count();
+        $uptime   = $total > 0 ? round($up / $total * 100, 2) : 100;
+        $avgTime  = $verifications->avg('response_time_ms');
+        $incidents = $site->incidents()->where('started_at', '>=', now()->subDays(30))->get();
 
-        $totalVerifs = $verifications->count();
-        $uptimePct   = $totalVerifs > 0
-            ? round($verifications->where('is_up', true)->count() / $totalVerifs * 100, 2)
-            : 100;
-
-        // Temps de réponse moyen
-        $avgResponse = $verifications->avg('response_time_ms');
-
-        // Incidents
-        $incidents = Incident::where('site_id', $site->id)
-            ->whereBetween('started_at', [$periodStart, $periodEnd])
-            ->get();
-
-        // Créer le rapport en base
-        $rapport = Rapport::create([
-            'site_id'      => $site->id,
-            'period_start' => $periodStart->toDateString(),
-            'period_end'   => $periodEnd->toDateString(),
-            'uptime_pct'   => $uptimePct,
-            'generated_at' => now(),
-        ]);
-
-        // Générer le PDF
         $pdf = Pdf::loadView('rapports.pdf', compact(
-            'site', 'rapport', 'verifications',
-            'incidents', 'uptimePct', 'avgResponse',
-            'periodStart', 'periodEnd'
+            'site', 'verifications', 'uptime', 'avgTime', 'incidents'
         ));
 
-        $filename = "rapport_{$site->id}_" . now()->format('Ymd_His') . ".pdf";
-        $path = storage_path("app/public/rapports/{$filename}");
+        // Sauvegarde dans la table rapports
+        $filename = 'rapport_' . $site->id . '_' . now()->format('YmdHis') . '.pdf';
+        Rapport::create([
+            'site_id'       => $site->id,
+            'period_start'  => now()->subDays(30)->toDateString(),
+            'period_end'    => now()->toDateString(),
+            'uptime_pct'    => $uptime,
+            'incidents_count' => $incidents->count(),
+            'avg_response_ms' => round($avgTime),
+            'pdf_path'      => $filename,
+            'generated_at'  => now(),
+        ]);
 
-        if (!file_exists(storage_path('app/public/rapports'))) {
-            mkdir(storage_path('app/public/rapports'), 0755, true);
-        }
-
-        $pdf->save($path);
-        $rapport->update(['pdf_path' => $filename]);
-
-        return $pdf->download($filename);
+        return $pdf->download("rapport_{$site->client_name}.pdf");
     }
 
-    public function download(Rapport $rapport)
-    {
-        $path = storage_path("app/public/rapports/{$rapport->pdf_path}");
-        return response()->download($path);
+    public function sendEmail(Request $request, Site $site) {
+        $request->validate(['email' => 'required|email']);
+
+        $verifications = $site->verifications()
+            ->where('created_at', '>=', now()->subDays(30))
+            ->orderBy('checked_at', 'desc')->get();
+
+        $total   = $verifications->count();
+        $up      = $verifications->where('is_up', true)->count();
+        $uptime  = $total > 0 ? round($up / $total * 100, 2) : 100;
+        $avgTime = $verifications->avg('response_time_ms');
+        $incidents = $site->incidents()->where('started_at', '>=', now()->subDays(30))->get();
+
+        $pdf = Pdf::loadView('rapports.pdf', compact(
+            'site', 'verifications', 'uptime', 'avgTime', 'incidents'
+        ));
+
+        Mail::raw(
+            "Veuillez trouver ci-joint le rapport de disponibilite de {$site->client_name}.\n\n-- MonitorPro | Soft Seven Art",
+            function($m) use ($request, $site, $pdf) {
+                $m->to($request->email)
+                  ->subject("Rapport disponibilite — {$site->client_name}")
+                  ->attachData($pdf->output(), "rapport_{$site->client_name}.pdf");
+            }
+        );
+
+        return back()->with('success', "Rapport envoyé à {$request->email} !");
     }
 }

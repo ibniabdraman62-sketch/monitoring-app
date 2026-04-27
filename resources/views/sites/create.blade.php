@@ -85,5 +85,19 @@
         </form>
     </div>
 </div>
+<div class="form-group">
+    <label class="form-label">Email du client (optionnel)</label>
+    <input type="email" name="client_email" class="form-input"
+           placeholder="client@exemple.com"
+           value="{{ old('client_email', $site->client_email ?? '') }}">
+</div>
 
+<div class="form-group" style="display:flex; align-items:center; gap:12px;">
+    <input type="checkbox" name="whois_check" id="whois_check" value="1"
+           {{ old('whois_check', ($site->whois_check ?? true) ? '1' : '0') == '1' ? 'checked' : '' }}
+           style="width:18px; height:18px;">
+    <label for="whois_check" class="form-label" style="margin:0;">
+        Activer la vérification WHOIS (expiration domaine)
+    </label>
+</div>
 @endsection

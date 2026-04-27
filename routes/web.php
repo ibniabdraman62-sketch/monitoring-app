@@ -57,7 +57,8 @@ Route::post('/agents', [\App\Http\Controllers\AgentController::class, 'store'])
     ->name('agents.store')->middleware(['auth','super_admin']);
 Route::patch('/agents/{user}/toggle', [\App\Http\Controllers\AgentController::class, 'toggle'])
     ->name('agents.toggle')->middleware(['auth','super_admin']);
-    
+    Route::post('/rapports/{site}/send-email', [\App\Http\Controllers\RapportController::class, 'sendEmail'])
+    ->name('rapports.send-email')->middleware('auth');
 });
 
 require __DIR__.'/auth.php';

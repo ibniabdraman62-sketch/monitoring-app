@@ -40,6 +40,8 @@ $sites = Site::where('user_id', Auth::id())
             'ssl_check'    => $request->has('ssl_check'),
             'is_active'    => true,
             'notify_emails' => $request->notify_emails,
+            'client_email' => $request->client_email,
+'whois_check'  => $request->has('whois_check') ? 1 : 0,
         ]);
 
         return redirect()->route('sites.index')
@@ -73,6 +75,8 @@ $sites = Site::where('user_id', Auth::id())
             'response_threshold_ms' => $request->response_threshold_ms,
             'ssl_check'    => $request->has('ssl_check'),
             'notify_emails' => $request->notify_emails,
+            'client_email' => $request->client_email,
+'whois_check'  => $request->has('whois_check') ? 1 : 0,
         ]);
 
         return redirect()->route('sites.index')
