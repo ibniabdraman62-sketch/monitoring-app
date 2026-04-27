@@ -1,29 +1,41 @@
 <?php
 namespace App\Console\Commands;
-
 use Illuminate\Console\Command;
 use App\Models\Site;
-use App\Services\WhoisService;
+use App\Models\CronLog;
+use App\Services\MonitoringService;
 
-class CheckWhoisCommand extends Command
-{
-    protected $signature   = 'monitor:check-whois';
-    protected $description = 'Vérifie les informations WHOIS et expiration des domaines';
+class CheckUptimeCommand extends Command {
+    protected $signature   = 'monitor:check-uptime';
+    protected $description = 'Vérifie la disponibilité de tous les sites actifs';
 
-    public function handle(): void
-    {
+    public function handle(): void {
+        $start = now();
         $sites = Site::where('is_active', true)->get();
-        $service = new WhoisService();
-        $this->info("Vérification WHOIS de {$sites->count()} domaines...");
+        $errors = 0;
+        $errorMsg = '';
+        $service = new MonitoringService();
 
         foreach ($sites as $site) {
-            $result = $service->checkDomain($site);
-            if ($result['success']) {
-                $this->line("✅ WHOIS OK — {$site->client_name} — Expire : {$result['expires_at']}");
-            } else {
-                $this->warn("⚠️ WHOIS échoué — {$site->client_name} — {$result['error']}");
+            try {
+                $service->checkSite($site);
+                $this->line("OK: {$site->client_name}");
+            } catch (\Exception $e) {
+                $errors++;
+                $errorMsg .= "{$site->client_name}: {$e->getMessage()}\n";
+                $this->warn("ERR: {$site->client_name}");
             }
         }
-        $this->info('Vérification WHOIS terminée.');
+
+        CronLog::create([
+            'command'       => 'monitor:check-uptime',
+            'status'        => $errors === 0 ? 'success' : 'error',
+            'duration_ms'   => now()->diffInMilliseconds($start),
+            'sites_checked' => $sites->count(),
+            'errors_count'  => $errors,
+            'error_message' => $errorMsg ?: null,
+            'executed_at'   => now(),
+        ]);
+        $this->info("Uptime vérifié : {$sites->count()} sites, {$errors} erreurs.");
     }
 }

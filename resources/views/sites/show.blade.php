@@ -68,7 +68,11 @@
     <div class="card-title">📈 Temps de réponse — 24 dernières heures</div>
     <canvas id="responseChart" height="80"></canvas>
 </div>
-
+<!-- Graphique disponibilité 30 jours -->
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-title">📊 Disponibilité par jour — 30 derniers jours</div>
+    <canvas id="uptimeChart" height="80"></canvas>
+</div>
 <!-- Dernières vérifications -->
 <div class="table-wrapper" style="margin-bottom:24px;">
     <div class="table-header">
@@ -224,6 +228,42 @@ function checkNow(siteId) {
         location.reload();
     });
 }
+
+// Graphique disponibilité 30 jours
+@php
+    $uptimeData = [];
+    for ($i = 29; $i >= 0; $i--) {
+        $day = now()->subDays($i);
+        $total = $site->verifications()->whereDate('checked_at', $day)->count();
+        $up = $site->verifications()->whereDate('checked_at', $day)->where('is_up', true)->count();
+        $uptimeData[] = [
+            'x' => $day->format('d/m'),
+            'y' => $total > 0 ? round($up/$total*100, 1) : null,
+        ];
+    }
+@endphp
+const uptimeData = @json(array_filter($uptimeData, fn($d) => $d['y'] !== null));
+
+new Chart(document.getElementById('uptimeChart'), {
+    type: 'bar',
+    data: {
+        datasets: [{
+            label: 'Disponibilité (%)',
+            data: uptimeData,
+            backgroundColor: uptimeData.map(d => d.y >= 99 ? '#10B981' : d.y >= 95 ? '#D97706' : '#EF4444'),
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: '#64748B' }, grid: { display: false } },
+            y: { min: 0, max: 100, ticks: { color: '#64748B', callback: v => v+'%' }, grid: { color: '#F1F5F9' } }
+        }
+    }
+});
 </script>
 <!-- Bloc WHOIS Domaine -->
 <div class="card" style="margin-top:16px;">

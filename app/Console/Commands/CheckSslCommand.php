@@ -1,46 +1,41 @@
 <?php
 namespace App\Console\Commands;
-
 use Illuminate\Console\Command;
 use App\Models\Site;
-use App\Services\AlerteService;
+use App\Models\CronLog;
+use App\Services\MonitoringService;
 
-class CheckSslCommand extends Command
-{
-    protected $signature   = 'monitor:check-ssl';
-    protected $description = 'Vérifie les certificats SSL de tous les sites actifs';
+class CheckUptimeCommand extends Command {
+    protected $signature   = 'monitor:check-uptime';
+    protected $description = 'Vérifie la disponibilité de tous les sites actifs';
 
-    public function handle(): void
-    {
-        $sites = Site::where('is_active', true)->where('ssl_check', true)->get();
-        $alerteService = new AlerteService();
-        $this->info("Vérification SSL de {$sites->count()} sites...");
+    public function handle(): void {
+        $start = now();
+        $sites = Site::where('is_active', true)->get();
+        $errors = 0;
+        $errorMsg = '';
+        $service = new MonitoringService();
 
         foreach ($sites as $site) {
-            $lastVerif = $site->verifications()->latest('checked_at')->first();
-            if ($lastVerif && $lastVerif->ssl_expires_at) {
-                $daysLeft = now()->diffInDays($lastVerif->ssl_expires_at, false);
-                if ($daysLeft <= 30 && $daysLeft >= 0) {
-                    $this->warn("⚠️ SSL expire dans {$daysLeft}j — {$site->client_name}");
-                    // Envoie alerte SSL
-                    $emails = $site->notify_emails
-                        ? explode(',', $site->notify_emails)
-                        : [config('mail.from.address')];
-                    foreach ($emails as $email) {
-                        \Illuminate\Support\Facades\Mail::raw(
-                            "⚠️ ALERTE SSL — {$site->client_name}\n\n" .
-                            "Le certificat SSL du site {$site->url} expire dans {$daysLeft} jours.\n" .
-                            "Date d'expiration : {$lastVerif->ssl_expires_at}\n\n" .
-                            "Veuillez renouveler ce certificat rapidement.\n\n" .
-                            "— MonitorPro | Soft Seven Art",
-                            fn($m) => $m->to(trim($email))
-                                         ->subject("⚠️ SSL expire bientôt — {$site->client_name}")
-                        );
-                    }
-                }
+            try {
+                $service->checkSite($site);
+                $this->line("OK: {$site->client_name}");
+            } catch (\Exception $e) {
+                $errors++;
+                $errorMsg .= "{$site->client_name}: {$e->getMessage()}\n";
+                $this->warn("ERR: {$site->client_name}");
             }
-            $this->line("✅ SSL vérifié — {$site->client_name}");
         }
-        $this->info('Vérification SSL terminée.');
+
+        CronLog::create([
+            'command'       => 'monitor:check-uptime',
+            'status'        => $errors === 0 ? 'success' : 'error',
+            'duration_ms'   => now()->diffInMilliseconds($start),
+            'sites_checked' => $sites->count(),
+            'errors_count'  => $errors,
+            'error_message' => $errorMsg ?: null,
+            'executed_at'   => now(),
+        ]);
+        $this->info("Uptime vérifié : {$sites->count()} sites, {$errors} erreurs.");
     }
 }

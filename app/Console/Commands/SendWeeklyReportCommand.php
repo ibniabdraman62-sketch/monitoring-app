@@ -1,47 +1,41 @@
 <?php
 namespace App\Console\Commands;
-
 use Illuminate\Console\Command;
 use App\Models\Site;
-use App\Models\Verification;
-use App\Models\Incident;
+use App\Models\CronLog;
+use App\Services\MonitoringService;
 
-class SendWeeklyReportCommand extends Command
-{
-    protected $signature   = 'monitor:send-weekly-report';
-    protected $description = 'Envoie le rapport hebdomadaire par email chaque lundi';
+class CheckUptimeCommand extends Command {
+    protected $signature   = 'monitor:check-uptime';
+    protected $description = 'Vérifie la disponibilité de tous les sites actifs';
 
-    public function handle(): void
-    {
+    public function handle(): void {
+        $start = now();
         $sites = Site::where('is_active', true)->get();
-        $this->info("Génération du rapport hebdomadaire pour {$sites->count()} sites...");
+        $errors = 0;
+        $errorMsg = '';
+        $service = new MonitoringService();
 
         foreach ($sites as $site) {
-            $total    = $site->verifications()->where('created_at', '>=', now()->subWeek())->count();
-            $up       = $site->verifications()->where('created_at', '>=', now()->subWeek())->where('is_up', true)->count();
-            $uptime   = $total > 0 ? round($up / $total * 100, 1) : 100;
-            $avgTime  = $site->verifications()->where('created_at', '>=', now()->subWeek())->avg('response_time_ms');
-            $incidents = $site->incidents()->where('started_at', '>=', now()->subWeek())->count();
-
-            $emails = $site->notify_emails
-                ? explode(',', $site->notify_emails)
-                : [config('mail.from.address')];
-
-            foreach ($emails as $email) {
-                \Illuminate\Support\Facades\Mail::raw(
-                    "📊 RAPPORT HEBDOMADAIRE — {$site->client_name}\n\n" .
-                    "Période : " . now()->subWeek()->format('d/m/Y') . " → " . now()->format('d/m/Y') . "\n\n" .
-                    "• Uptime : {$uptime}%\n" .
-                    "• Temps réponse moyen : " . round($avgTime) . "ms\n" .
-                    "• Incidents : {$incidents}\n" .
-                    "• URL : {$site->url}\n\n" .
-                    "— MonitorPro | Soft Seven Art",
-                    fn($m) => $m->to(trim($email))
-                                 ->subject("📊 Rapport hebdo — {$site->client_name}")
-                );
+            try {
+                $service->checkSite($site);
+                $this->line("OK: {$site->client_name}");
+            } catch (\Exception $e) {
+                $errors++;
+                $errorMsg .= "{$site->client_name}: {$e->getMessage()}\n";
+                $this->warn("ERR: {$site->client_name}");
             }
-            $this->line("✅ Rapport envoyé — {$site->client_name}");
         }
-        $this->info('Rapports hebdomadaires envoyés.');
+
+        CronLog::create([
+            'command'       => 'monitor:check-uptime',
+            'status'        => $errors === 0 ? 'success' : 'error',
+            'duration_ms'   => now()->diffInMilliseconds($start),
+            'sites_checked' => $sites->count(),
+            'errors_count'  => $errors,
+            'error_message' => $errorMsg ?: null,
+            'executed_at'   => now(),
+        ]);
+        $this->info("Uptime vérifié : {$sites->count()} sites, {$errors} erreurs.");
     }
 }

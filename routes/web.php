@@ -32,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rapports/download/{rapport}', [RapportController::class, 'download'])->name('rapports.download');
 
     Route::get('/incidents', [IncidentController::class, 'index'])->name('incidents.index');
+    
     // Route Super Admin — supervision Cron Jobs
 Route::get('/cron-jobs', function() {
     return view('admin.cron_jobs');
@@ -45,6 +46,18 @@ Route::post('/cron-jobs/run', function(\Illuminate\Http\Request $request) {
     return back()->with('success', "Commande {$command} exécutée avec succès !");
 })->name('cron.run')->middleware(['auth','super_admin']);
 
+// Alertes
+Route::get('/alertes', [\App\Http\Controllers\AlerteController::class, 'index'])
+    ->name('alertes.index')->middleware('auth');
+
+// Gestion agents (Super Admin)
+Route::get('/agents', [\App\Http\Controllers\AgentController::class, 'index'])
+    ->name('agents.index')->middleware(['auth','super_admin']);
+Route::post('/agents', [\App\Http\Controllers\AgentController::class, 'store'])
+    ->name('agents.store')->middleware(['auth','super_admin']);
+Route::patch('/agents/{user}/toggle', [\App\Http\Controllers\AgentController::class, 'toggle'])
+    ->name('agents.toggle')->middleware(['auth','super_admin']);
+    
 });
 
 require __DIR__.'/auth.php';

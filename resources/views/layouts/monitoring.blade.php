@@ -296,6 +296,10 @@
            class="nav-item {{ request()->routeIs('incidents.*') ? 'active' : '' }}">
             <i class="fas fa-exclamation-triangle"></i> Incidents
         </a>
+        <a href="{{ route('alertes.index') }}"
+   class="nav-item {{ request()->routeIs('alertes.*') ? 'active' : '' }}">
+    <i class="fas fa-bell"></i> Alertes
+</a>
 
         <div class="nav-section" style="margin-top:12px;">Intelligence IA</div>
         <a href="{{ route('chatbot.index') }}"
@@ -307,6 +311,10 @@
 <a href="{{ route('cron.index') }}"
    class="nav-item {{ request()->routeIs('cron.*') ? 'active' : '' }}">
     <i class="fas fa-cogs"></i> Supervision Cron
+</a>
+<a href="{{ route('agents.index') }}"
+   class="nav-item {{ request()->routeIs('agents.*') ? 'active' : '' }}">
+    <i class="fas fa-users-cog"></i> Gestion Agents
 </a>
 @endif
         <div class="nav-section" style="margin-top:12px;">Compte</div>
