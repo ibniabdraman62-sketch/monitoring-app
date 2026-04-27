@@ -10,7 +10,12 @@ class Site extends Model {
     protected $fillable = [
         'user_id', 'client_name', 'url',
         'frequency_min', 'response_threshold_ms',
-        'ssl_check', 'is_active'
+        'ssl_check', 'is_active',
+        'domain_registrar',
+        'domain_expires_at',
+        'domain_created_at',
+        'whois_checked_at',
+        'notify_emails'
     ];
 
     public function user() {

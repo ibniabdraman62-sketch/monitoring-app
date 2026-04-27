@@ -32,6 +32,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rapports/download/{rapport}', [RapportController::class, 'download'])->name('rapports.download');
 
     Route::get('/incidents', [IncidentController::class, 'index'])->name('incidents.index');
+    // Route Super Admin — supervision Cron Jobs
+Route::get('/cron-jobs', function() {
+    return view('admin.cron_jobs');
+})->name('cron.index')->middleware('super_admin');
+Route::post('/cron-jobs/run', function(\Illuminate\Http\Request $request) {
+    if (!auth()->user()->isSuperAdmin()) abort(403);
+    $command = $request->input('command');
+    $allowed = ['monitor:check-uptime','monitor:check-ssl','monitor:check-whois','monitor:send-weekly-report','monitor:cleanup'];
+    if (!in_array($command, $allowed)) abort(403);
+    \Illuminate\Support\Facades\Artisan::call($command);
+    return back()->with('success', "Commande {$command} exécutée avec succès !");
+})->name('cron.run')->middleware(['auth','super_admin']);
+
 });
 
 require __DIR__.'/auth.php';

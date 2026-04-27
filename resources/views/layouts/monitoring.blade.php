@@ -302,7 +302,13 @@
            class="nav-item {{ request()->routeIs('chatbot.*') ? 'active' : '' }}">
             <i class="fas fa-robot"></i> Assistant IA
         </a>
-
+        @if(auth()->user()->isSuperAdmin())
+<div class="nav-section" style="margin-top:12px;">Super Admin</div>
+<a href="{{ route('cron.index') }}"
+   class="nav-item {{ request()->routeIs('cron.*') ? 'active' : '' }}">
+    <i class="fas fa-cogs"></i> Supervision Cron
+</a>
+@endif
         <div class="nav-section" style="margin-top:12px;">Compte</div>
         <a href="{{ route('profile.edit') }}" class="nav-item">
             <i class="fas fa-user-circle"></i> Profil
