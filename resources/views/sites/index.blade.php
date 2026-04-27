@@ -25,6 +25,7 @@
         @endif
     </form>
 </div>
+
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
     <div>
         <span class="badge badge-green" style="font-size:12px; padding:6px 14px;">
@@ -42,7 +43,6 @@
 @forelse($sites as $site)
 @php
     $lastVerif = $site->verifications()->latest('checked_at')->first();
-    $uptime = 0;
     $total = $site->verifications()->where('created_at','>=',now()->subDay())->count();
     $up = $site->verifications()->where('created_at','>=',now()->subDay())->where('is_up',true)->count();
     $uptime = $total > 0 ? round($up/$total*100,1) : 100;
@@ -51,6 +51,9 @@
     if($lastVerif && $lastVerif->ssl_expires_at) {
         $sslDays = now()->diffInDays($lastVerif->ssl_expires_at, false);
     }
+    $domainDays = $site->domain_expires_at
+        ? now()->diffInDays(\Carbon\Carbon::parse($site->domain_expires_at), false)
+        : null;
 @endphp
 
 <div class="card" style="margin-bottom:16px; padding:0; overflow:hidden;">
@@ -105,6 +108,13 @@
                             🔒 SSL {{ $sslDays > 0 ? $sslDays.'j' : 'EXPIRÉ' }}
                         </span>
                     @endif
+
+                    {{-- Badge WHOIS domaine (CDC Module 7) --}}
+                    @if($domainDays !== null && $domainDays <= 30)
+                        <span class="badge {{ $domainDays <= 7 ? 'badge-red' : 'badge-yellow' }}">
+                            🌐 Domaine {{ $domainDays <= 0 ? 'EXPIRÉ' : $domainDays.'j' }}
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -154,6 +164,16 @@
                     </div>
                     <div style="font-size:10px; color:#64748B; font-weight:600;">DERNIÈRE VÉRIF</div>
                 </div>
+                {{-- Infos WHOIS --}}
+                @if($site->domain_expires_at)
+                <div style="text-align:center;">
+                    <div style="font-size:14px; font-weight:700;
+                        color:{{ $domainDays !== null && $domainDays <= 7 ? '#DC2626' : ($domainDays !== null && $domainDays <= 30 ? '#D97706' : '#059669') }}">
+                        {{ $domainDays !== null ? ($domainDays > 0 ? $domainDays.'j' : 'EXPIRÉ') : '—' }}
+                    </div>
+                    <div style="font-size:10px; color:#64748B; font-weight:600;">DOMAINE</div>
+                </div>
+                @endif
             </div>
         </div>
 

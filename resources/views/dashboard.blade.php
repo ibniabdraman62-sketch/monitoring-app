@@ -68,7 +68,11 @@
         </div>
     </div>
 </div>
-
+<!-- Histogramme 7 jours -->
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-title">📊 Disponibilité globale — 7 derniers jours</div>
+    <canvas id="weekChart" height="80"></canvas>
+</div>
 <!-- Tableau statut -->
 <div class="table-wrapper">
     <div class="table-header">
@@ -288,6 +292,42 @@ function checkNow(siteId, btn) {
     })
     .catch(() => { btn.innerHTML = orig; btn.disabled = false; });
 }
+// Histogramme 7 jours
+@php
+    $weekData = [];
+    for($i = 6; $i >= 0; $i--) {
+        $day = now()->subDays($i);
+        $total = \App\Models\Verification::whereIn('site_id', $sites->pluck('id'))
+            ->whereDate('created_at', $day)->count();
+        $up = \App\Models\Verification::whereIn('site_id', $sites->pluck('id'))
+            ->whereDate('created_at', $day)->where('is_up', true)->count();
+        $weekData[] = [
+            'x' => $day->format('D d/m'),
+            'y' => $total > 0 ? round($up/$total*100,1) : 100
+        ];
+    }
+@endphp
+const weekData = @json($weekData);
+new Chart(document.getElementById('weekChart'), {
+    type: 'bar',
+    data: {
+        datasets: [{
+            label: 'Disponibilité globale (%)',
+            data: weekData,
+            backgroundColor: weekData.map(d => d.y >= 99 ? '#10B981' : d.y >= 95 ? '#D97706' : '#EF4444'),
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: '#64748B' }, grid: { display: false } },
+            y: { min: 0, max: 100, ticks: { color: '#64748B', callback: v => v+'%' }, grid: { color: '#F1F5F9' } }
+        }
+    }
+});
 </script>
 
 <!-- ===== RAPPORT IA GEMINI ===== -->
@@ -447,5 +487,44 @@ function checkNow(siteId, btn) {
 </div>
 
 @endif
-
+<!-- 10 derniers incidents -->
+@php
+    $recentIncidents = \App\Models\Incident::with('site')
+        ->whereIn('site_id', $sitesStatus->pluck('id'))
+        ->latest('started_at')->take(10)->get();
+@endphp
+@if($recentIncidents->count() > 0)
+<div class="table-wrapper" style="margin-top:24px;">
+    <div class="table-header">
+        <div style="font-size:15px; font-weight:700; color:#0C3547;">
+            ⚠️ 10 derniers incidents
+        </div>
+        <a href="{{ route('incidents.index') }}" class="btn-primary" style="padding:6px 14px; font-size:12px;">
+            Voir tout
+        </a>
+    </div>
+    <table>
+        <thead>
+            <tr><th>Site</th><th>Type</th><th>Début</th><th>Durée</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+        @foreach($recentIncidents as $inc)
+        <tr>
+            <td style="font-weight:700; color:#0C3547;">{{ $inc->site->client_name }}</td>
+            <td><span class="badge {{ $inc->type == 'offline' ? 'badge-red' : 'badge-yellow' }}">{{ strtoupper($inc->type) }}</span></td>
+            <td style="font-size:11px; color:#64748B;">{{ $inc->started_at->format('d/m/Y H:i') }}</td>
+            <td style="font-weight:600; color:#D97706;">{{ $inc->duration_min ? $inc->duration_min.'min' : 'En cours' }}</td>
+            <td>
+                @if($inc->resolved_at)
+                    <span class="badge badge-green">✅ Résolu</span>
+                @else
+                    <span class="badge badge-red">🔴 Actif</span>
+                @endif
+            </td>
+        </tr>
+        @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
 @endsection
