@@ -326,7 +326,9 @@
         <div class="avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
         <div class="user-info">
             <div class="user-name">{{ auth()->user()->name }}</div>
-            <div class="user-role">Administrateur</div>
+            <div class="user-role">
+    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Agent' }}
+</div>
         </div>
     </div>
 </div>
