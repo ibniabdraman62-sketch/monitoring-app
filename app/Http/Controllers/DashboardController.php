@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $sites = Site::where('user_id', Auth::id())->get();
+        $sites   = Site::where('user_id', Auth::id())->get();
         $siteIds = $sites->pluck('id');
 
         // KPIs
@@ -20,27 +20,28 @@ class DashboardController extends Controller
         $incidents   = Incident::whereIn('site_id', $siteIds)
                         ->whereNull('resolved_at')->count();
 
-        // Uptime moyen 24h
+        // Uptime moyen 24h — utilise checked_at
         $uptimeData  = Verification::whereIn('site_id', $siteIds)
-                        ->where('created_at', '>=', Carbon::now()->subDay())->get();
+                        ->where('checked_at', '>=', Carbon::now()->subDay())->get();
         $uptimeMoyen = $uptimeData->count() > 0
             ? round($uptimeData->where('is_up', true)->count() / $uptimeData->count() * 100, 1)
             : 100;
 
-        // Disponibilité mois en cours
+        // Disponibilité mois en cours — utilise checked_at
         $totalMois  = Verification::whereIn('site_id', $siteIds)
-                        ->where('created_at', '>=', now()->startOfMonth())->count();
+                        ->where('checked_at', '>=', now()->startOfMonth())->count();
         $upMois     = Verification::whereIn('site_id', $siteIds)
-                        ->where('created_at', '>=', now()->startOfMonth())
+                        ->where('checked_at', '>=', now()->startOfMonth())
                         ->where('is_up', true)->count();
         $uptimeMois = $totalMois > 0 ? round($upMois / $totalMois * 100, 1) : 100;
 
-        // Données graphique 24h
+        // Données graphique 24h — utilise checked_at
         $graphData = [];
         foreach ($sites as $site) {
             $verifs = Verification::where('site_id', $site->id)
-                ->where('created_at', '>=', Carbon::now()->subHours(24))
-                ->orderBy('created_at')->get();
+                ->where('checked_at', '>=', Carbon::now()->subHours(24))
+                ->orderBy('checked_at')
+                ->get();
             $graphData[] = [
                 'label' => $site->client_name,
                 'data'  => $verifs->map(fn($v) => [

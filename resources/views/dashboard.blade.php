@@ -320,13 +320,15 @@ function checkNow(siteId, btn) {
     for($i = 6; $i >= 0; $i--) {
         $day = now()->subDays($i);
         $total = \App\Models\Verification::whereIn('site_id', $siteIds)
-            ->whereDate('created_at', $day)->count();
-        $up = \App\Models\Verification::whereIn('site_id', $siteIds)
-            ->whereDate('created_at', $day)->where('is_up', true)->count();
-        $weekData[] = [
-            'x' => $day->format('D d/m'),
-            'y' => $total > 0 ? round($up/$total*100,1) : 100
-        ];
+            ->whereDate('checked_at'', $day)->count();
+            $total = \App\Models\Verification::whereIn('site_id', $siteIds)
+    ->whereDate('checked_at', $day)->count();
+$up = \App\Models\Verification::whereIn('site_id', $siteIds)
+    ->whereDate('checked_at', $day)->where('is_up', true)->count();
+$weekData[] = [
+    'x' => $day->format('D d/m'),
+    'y' => $total > 0 ? round($up/$total*100,1) : 0
+];
     }
 @endphp
 const weekData = @json($weekData);
