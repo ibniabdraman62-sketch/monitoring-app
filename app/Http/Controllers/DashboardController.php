@@ -12,28 +12,35 @@ class DashboardController extends Controller
     public function index()
     {
         $sites = Site::where('user_id', Auth::id())->get();
+        $siteIds = $sites->pluck('id');
 
         // KPIs
-        $totalSites    = $sites->count();
+        $totalSites  = $sites->count();
         $activeSites = $sites->where('is_active', 1)->count();
-        $incidents     = Incident::whereIn('site_id', $sites->pluck('id'))
-                            ->whereNull('resolved_at')->count();
+        $incidents   = Incident::whereIn('site_id', $siteIds)
+                        ->whereNull('resolved_at')->count();
 
-        // Uptime moyen (dernières 24h)
-        $uptimeData = Verification::whereIn('site_id', $sites->pluck('id'))
-                        ->where('created_at', '>=', Carbon::now()->subDay())
-                        ->get();
+        // Uptime moyen 24h
+        $uptimeData  = Verification::whereIn('site_id', $siteIds)
+                        ->where('created_at', '>=', Carbon::now()->subDay())->get();
         $uptimeMoyen = $uptimeData->count() > 0
             ? round($uptimeData->where('is_up', true)->count() / $uptimeData->count() * 100, 1)
             : 100;
 
-        // Données graphique (temps de réponse 24h)
+        // Disponibilité mois en cours
+        $totalMois  = Verification::whereIn('site_id', $siteIds)
+                        ->where('created_at', '>=', now()->startOfMonth())->count();
+        $upMois     = Verification::whereIn('site_id', $siteIds)
+                        ->where('created_at', '>=', now()->startOfMonth())
+                        ->where('is_up', true)->count();
+        $uptimeMois = $totalMois > 0 ? round($upMois / $totalMois * 100, 1) : 100;
+
+        // Données graphique 24h
         $graphData = [];
         foreach ($sites as $site) {
             $verifs = Verification::where('site_id', $site->id)
                 ->where('created_at', '>=', Carbon::now()->subHours(24))
-                ->orderBy('created_at')
-                ->get();
+                ->orderBy('created_at')->get();
             $graphData[] = [
                 'label' => $site->client_name,
                 'data'  => $verifs->map(fn($v) => [
@@ -59,22 +66,14 @@ class DashboardController extends Controller
                 'checked_at'    => $lastVerif ? $lastVerif->checked_at->diffForHumans() : 'Jamais',
             ];
         });
-        // Récupérer le rapport IA
-        
+
+        // Rapport IA Gemini
         $aiRapport = cache()->get('ai_rapport', null);
 
         return view('dashboard', compact(
-    'totalSites', 'activeSites', 'incidents',
-    'uptimeMoyen', 'graphData', 'sitesStatus', 'aiRapport'
-    ));
-
-    // Disponibilité mois en cours
-$totalMois = \App\Models\Verification::whereIn('site_id', $sitesIds)
-    ->where('created_at', '>=', now()->startOfMonth())->count();
-$upMois = \App\Models\Verification::whereIn('site_id', $sitesIds)
-    ->where('created_at', '>=', now()->startOfMonth())
-    ->where('is_up', true)->count();
-$uptimeMois = $totalMois > 0 ? round($upMois / $totalMois * 100, 1) : 100;
-    
+            'totalSites', 'activeSites', 'incidents',
+            'uptimeMoyen', 'uptimeMois', 'graphData',
+            'sitesStatus', 'aiRapport'
+        ));
     }
 }

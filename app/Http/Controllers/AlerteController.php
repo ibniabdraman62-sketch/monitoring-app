@@ -19,6 +19,12 @@ class AlerteController extends Controller {
         $query->where('sent_at', '>=', request('date_from'));
     if(request('date_to'))
         $query->where('sent_at', '<=', request('date_to').' 23:59:59');
+    if(request('search')) {
+    $query->whereHas('incident.site', fn($q) =>
+        $q->where('client_name', 'LIKE', '%'.request('search').'%')
+          ->orWhere('url', 'LIKE', '%'.request('search').'%')
+    );
+}
 
     $alertes = $query->paginate(20);
     $sites = \App\Models\Site::where('user_id', auth()->id())->get();

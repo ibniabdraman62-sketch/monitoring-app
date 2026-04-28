@@ -1,44 +1,49 @@
-
-
-@php
-    $lastLog = App\Models\CronLog::latest('executed_at')->first();
-    $schedulerActif = $lastLog && $lastLog->executed_at->diffInMinutes(now()) < 10;
-@endphp
-<div class="card" style="margin-bottom:24px; display:flex; align-items:center; gap:16px;
-     background:{{ $schedulerActif ? 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' : 'linear-gradient(135deg,#FEE2E2,#FECACA)' }};
-     border:1px solid {{ $schedulerActif ? '#6EE7B7' : '#FCA5A5' }};">
-    <div style="width:48px; height:48px; border-radius:50%;
-                background:{{ $schedulerActif ? '#059669' : '#DC2626' }};
-                display:flex; align-items:center; justify-content:center;">
-        <i class="fas fa-{{ $schedulerActif ? 'check' : 'times' }}" style="color:#fff; font-size:20px;"></i>
-    </div>
-    <div>
-        <div style="font-size:15px; font-weight:800;
-                    color:{{ $schedulerActif ? '#065F46' : '#991B1B' }}">
-            Scheduler Laravel : {{ $schedulerActif ? '✅ ACTIF' : '⚠️ INACTIF' }}
-        </div>
-        <div style="font-size:12px; color:#64748B;">
-            @if($lastLog)
-                Dernière exécution : {{ $lastLog->executed_at->diffForHumans() }} ({{ $lastLog->command }})
-            @else
-                Aucune exécution enregistrée — lancez "php artisan schedule:work" dans un terminal
-            @endif
-        </div>
-    </div>
-</div>
-
 @extends('layouts.monitoring')
 @section('title', 'Supervision Cron Jobs')
 @section('subtitle', 'Tableau de bord Super Admin — 5 Cron Jobs actifs')
 
 @section('content')
 @php
-    $logs = App\Models\CronLog::orderBy('executed_at','desc')->take(50)->get();
+    $logs = App\Models\CronLog::orderBy('executed_at','desc')->take(100)->get();
     $lastRuns = [];
     foreach(['monitor:check-uptime','monitor:check-ssl','monitor:check-whois','monitor:send-weekly-report','monitor:cleanup'] as $cmd) {
         $lastRuns[$cmd] = App\Models\CronLog::where('command',$cmd)->latest('executed_at')->first();
     }
+    $lastLog = App\Models\CronLog::latest('executed_at')->first();
+    $schedulerActif = $lastLog && $lastLog->executed_at->diffInMinutes(now()) < 10;
 @endphp
+
+<!-- Indicateur Scheduler -->
+<div class="card" style="margin-bottom:24px; display:flex; align-items:center; gap:16px;
+     padding:20px 24px; border-radius:14px;
+     background:{{ $schedulerActif ? 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' : 'linear-gradient(135deg,#FEE2E2,#FECACA)' }};
+     border:1px solid {{ $schedulerActif ? '#6EE7B7' : '#FCA5A5' }};">
+    <div style="width:52px; height:52px; border-radius:50%; flex-shrink:0;
+                background:{{ $schedulerActif ? '#059669' : '#DC2626' }};
+                display:flex; align-items:center; justify-content:center;
+                box-shadow:0 4px 12px {{ $schedulerActif ? 'rgba(5,150,105,0.3)' : 'rgba(220,38,38,0.3)' }};">
+        <i class="fas fa-{{ $schedulerActif ? 'check' : 'exclamation-triangle' }}" style="color:#fff; font-size:20px;"></i>
+    </div>
+    <div style="flex:1;">
+        <div style="font-size:16px; font-weight:800;
+                    color:{{ $schedulerActif ? '#065F46' : '#991B1B' }}">
+            Scheduler Laravel : {{ $schedulerActif ? '✅ ACTIF' : '⚠️ INACTIF' }}
+        </div>
+        <div style="font-size:12px; color:#64748B; margin-top:4px;">
+            @if($lastLog)
+                Dernière exécution : {{ $lastLog->executed_at->diffForHumans() }} — Commande : <code>{{ $lastLog->command }}</code>
+            @else
+                Aucune exécution enregistrée — Lancez <code>php artisan schedule:work</code> dans un terminal
+            @endif
+        </div>
+    </div>
+    @if(!$schedulerActif)
+    <div style="flex-shrink:0; background:#FEE2E2; border:1px solid #FCA5A5;
+                padding:10px 16px; border-radius:10px; font-size:11px; font-weight:700; color:#991B1B;">
+        <i class="fas fa-terminal"></i> php artisan schedule:work
+    </div>
+    @endif
+</div>
 
 <!-- 5 cartes Cron Jobs -->
 <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:24px;">
@@ -54,8 +59,8 @@
     <i class="fas {{ $job[4] }}" style="font-size:26px; color:{{ $job[3] }}; margin-bottom:8px; display:block;"></i>
     <div style="font-size:13px; font-weight:800; color:#0C3547; margin-bottom:4px;">{{ $job[1] }}</div>
     <div style="font-size:11px; color:#64748B; margin-bottom:8px;">{{ $job[2] }}</div>
-    <span class="badge {{ $last && $last->status === 'error' ? 'badge-red' : 'badge-green' }}">
-        ● {{ $last ? strtoupper($last->status) : 'EN ATTENTE' }}
+    <span class="badge {{ $last ? ($last->status === 'error' ? 'badge-red' : 'badge-green') : 'badge-gray' }}">
+        ● {{ $last ? ($last->status === 'error' ? 'ERREUR' : 'SUCCÈS') : 'EN ATTENTE' }}
     </span>
     @if($last)
     <div style="font-size:10px; color:#94A3B8; margin-top:6px;">
@@ -70,7 +75,10 @@
 
 <!-- Boutons lancement manuel -->
 <div class="card" style="margin-bottom:24px;">
-    <div class="card-title"><i class="fas fa-terminal" style="color:#1697C2;"></i> Lancer manuellement un Cron Job</div>
+    <div class="card-title">
+        <i class="fas fa-terminal" style="color:#1697C2;"></i>
+        Lancer manuellement un Cron Job
+    </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
     @foreach([
         ['monitor:check-uptime','Vérifier uptime','btn-primary'],
@@ -90,7 +98,7 @@
     </div>
 </div>
 
-<!-- Historique des 50 dernières exécutions -->
+<!-- Historique des 100 dernières exécutions -->
 <div class="table-wrapper">
     <div class="table-header">
         <div style="font-size:15px; font-weight:700; color:#0C3547;">
@@ -143,4 +151,5 @@
         </tbody>
     </table>
 </div>
+
 @endsection

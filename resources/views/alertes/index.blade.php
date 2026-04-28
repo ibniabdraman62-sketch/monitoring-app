@@ -46,6 +46,13 @@
 <div class="card" style="margin-bottom:16px; padding:16px 24px;">
     <form method="GET" action="{{ route('alertes.index') }}"
           style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <div style="position:relative; flex:1;">
+    <i class="fas fa-search" style="position:absolute; left:12px; top:50%;
+       transform:translateY(-50%); color:#94A3B8;"></i>
+    <input type="text" name="search" value="{{ request('search') }}"
+           placeholder="Rechercher par site ou URL..."
+           class="form-input" style="padding-left:36px;">
+</div>
         <select name="site_id" class="form-input" style="width:200px;">
             <option value="">Tous les sites</option>
             @foreach($sites as $site)

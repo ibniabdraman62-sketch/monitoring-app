@@ -18,62 +18,70 @@ class RapportController extends Controller {
     }
 
     public function generate(Request $request, Site $site) {
-        $verifications = $site->verifications()
-            ->where('created_at', '>=', now()->subDays(30))
-            ->orderBy('checked_at', 'desc')->get();
+    $periodStart = now()->subDays(30);
+    $periodEnd   = now();
 
-        $total    = $verifications->count();
-        $up       = $verifications->where('is_up', true)->count();
-        $uptime   = $total > 0 ? round($up / $total * 100, 2) : 100;
-        $avgTime  = $verifications->avg('response_time_ms');
-        $incidents = $site->incidents()->where('started_at', '>=', now()->subDays(30))->get();
+    $verifications = $site->verifications()
+        ->where('created_at', '>=', $periodStart)
+        ->orderBy('checked_at', 'desc')->get();
 
-        $pdf = Pdf::loadView('rapports.pdf', compact(
-            'site', 'verifications', 'uptime', 'avgTime', 'incidents'
-        ));
+    $total      = $verifications->count();
+    $up         = $verifications->where('is_up', true)->count();
+    $uptimePct  = $total > 0 ? round($up / $total * 100, 2) : 100;
+    $avgResponse = $verifications->avg('response_time_ms');
+    $incidents  = $site->incidents()
+        ->where('started_at', '>=', $periodStart)->get();
 
-        // Sauvegarde dans la table rapports
-        $filename = 'rapport_' . $site->id . '_' . now()->format('YmdHis') . '.pdf';
-        Rapport::create([
-            'site_id'       => $site->id,
-            'period_start'  => now()->subDays(30)->toDateString(),
-            'period_end'    => now()->toDateString(),
-            'uptime_pct'    => $uptime,
-            'incidents_count' => $incidents->count(),
-            'avg_response_ms' => round($avgTime),
-            'pdf_path'      => $filename,
-            'generated_at'  => now(),
-        ]);
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('rapports.pdf', compact(
+        'site', 'verifications', 'uptimePct',
+        'avgResponse', 'incidents', 'periodStart', 'periodEnd'
+    ));
 
-        return $pdf->download("rapport_{$site->client_name}.pdf");
-    }
+    \App\Models\Rapport::create([
+        'site_id'        => $site->id,
+        'period_start'   => $periodStart->toDateString(),
+        'period_end'     => $periodEnd->toDateString(),
+        'uptime_pct'     => $uptimePct,
+        'incidents_count' => $incidents->count(),
+        'avg_response_ms' => round($avgResponse),
+        'pdf_path'       => 'rapport_'.$site->id.'_'.now()->format('YmdHis').'.pdf',
+        'generated_at'   => now(),
+    ]);
+
+    return $pdf->download("rapport_{$site->client_name}.pdf");
+}
 
     public function sendEmail(Request $request, Site $site) {
-        $request->validate(['email' => 'required|email']);
+    $request->validate(['email' => 'required|email']);
 
-        $verifications = $site->verifications()
-            ->where('created_at', '>=', now()->subDays(30))
-            ->orderBy('checked_at', 'desc')->get();
+    $periodStart = now()->subDays(30);
+    $periodEnd   = now();
 
-        $total   = $verifications->count();
-        $up      = $verifications->where('is_up', true)->count();
-        $uptime  = $total > 0 ? round($up / $total * 100, 2) : 100;
-        $avgTime = $verifications->avg('response_time_ms');
-        $incidents = $site->incidents()->where('started_at', '>=', now()->subDays(30))->get();
+    $verifications = $site->verifications()
+        ->where('created_at', '>=', $periodStart)
+        ->orderBy('checked_at', 'desc')->get();
 
-        $pdf = Pdf::loadView('rapports.pdf', compact(
-            'site', 'verifications', 'uptime', 'avgTime', 'incidents'
-        ));
+    $total    = $verifications->count();
+    $up       = $verifications->where('is_up', true)->count();
+    $uptimePct  = $total > 0 ? round($up / $total * 100, 2) : 100;
+    $avgResponse = $verifications->avg('response_time_ms');
+    $incidents  = $site->incidents()
+        ->where('started_at', '>=', $periodStart)->get();
 
-        Mail::raw(
-            "Veuillez trouver ci-joint le rapport de disponibilite de {$site->client_name}.\n\n-- MonitorPro | Soft Seven Art",
-            function($m) use ($request, $site, $pdf) {
-                $m->to($request->email)
-                  ->subject("Rapport disponibilite — {$site->client_name}")
-                  ->attachData($pdf->output(), "rapport_{$site->client_name}.pdf");
-            }
-        );
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('rapports.pdf', compact(
+        'site', 'verifications', 'uptimePct',
+        'avgResponse', 'incidents', 'periodStart', 'periodEnd'
+    ));
 
-        return back()->with('success', "Rapport envoyé à {$request->email} !");
-    }
+    \Illuminate\Support\Facades\Mail::raw(
+        "Veuillez trouver ci-joint le rapport de disponibilite de {$site->client_name}.\n\n-- MonitorPro | Soft Seven Art",
+        function($m) use ($request, $site, $pdf) {
+            $m->to($request->email)
+              ->subject("Rapport disponibilite — {$site->client_name}")
+              ->attachData($pdf->output(), "rapport_{$site->client_name}.pdf");
+        }
+    );
+
+    return back()->with('success', "✅ Rapport envoyé à {$request->email} !");
+}
 }
