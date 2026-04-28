@@ -69,7 +69,40 @@
     </div>
 </div>
 
-<!-- Histogramme disponibilité 7 derniers jours (CDC Module 5) -->
+<!-- Disponibilité mois en cours -->
+<div class="card" style="margin-bottom:24px; padding:16px 24px;
+     display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#F0F9FF,#E0F2FE);">
+    <i class="fas fa-calendar-check" style="font-size:28px; color:#1697C2;"></i>
+    <div>
+        <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase;">
+            Disponibilité globale — mois en cours ({{ now()->format('F Y') }})
+        </div>
+        <div style="font-size:28px; font-weight:900;
+            color:{{ $uptimeMois >= 99 ? '#059669' : ($uptimeMois >= 95 ? '#D97706' : '#DC2626') }}">
+            {{ $uptimeMois }}%
+        </div>
+    </div>
+    <div style="margin-left:auto; text-align:right;">
+        <div style="font-size:12px; color:#64748B;">Calculé sur {{ now()->daysInMonth }} jours</div>
+    </div>
+</div>
+
+<!-- Histogramme disponibilité 7 derniers jours -->
+@php
+    $siteIds = $sitesStatus->pluck('id');
+    $weekData = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $day = now()->subDays($i);
+        $total = \App\Models\Verification::whereIn('site_id', $siteIds)
+            ->whereDate('checked_at', $day)->count();
+        $up = \App\Models\Verification::whereIn('site_id', $siteIds)
+            ->whereDate('checked_at', $day)->where('is_up', true)->count();
+        $weekData[] = [
+            'x' => $day->format('D d/m'),
+            'y' => $total > 0 ? round($up / $total * 100, 1) : 0
+        ];
+    }
+@endphp
 <div class="card" style="margin-bottom:24px;">
     <div class="card-title">📊 Disponibilité globale — 7 derniers jours</div>
     <canvas id="weekChart" height="80"></canvas>
@@ -154,9 +187,9 @@
                 <td>
                     @php
                         $siteModel = App\Models\Site::find($site['id']);
-                        $tot = $siteModel->verifications()->where('created_at','>=',now()->subDay())->count();
-                        $up = $siteModel->verifications()->where('created_at','>=',now()->subDay())->where('is_up',true)->count();
-                        $upt = $tot > 0 ? round($up/$tot*100,1) : 100;
+                        $tot = $siteModel->verifications()->where('checked_at', '>=', now()->subDay())->count();
+                        $up  = $siteModel->verifications()->where('checked_at', '>=', now()->subDay())->where('is_up', true)->count();
+                        $upt = $tot > 0 ? round($up / $tot * 100, 1) : 100;
                     @endphp
                     <div style="display:flex; align-items:center; gap:6px;">
                         <div class="uptime-bar" style="width:60px;">
@@ -200,6 +233,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ── Graphique temps de réponse 24h ──────────────────────────────────────────
 const graphData = @json($graphData);
 const colors = ['#1697C2','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899'];
 let myChart = null;
@@ -212,7 +246,9 @@ function buildDatasets(type) {
         backgroundColor: type === 'bar'
             ? colors[i % colors.length] + '99'
             : colors[i % colors.length] + '20',
-        tension: 0.4, fill: type === 'line', pointRadius: 3,
+        tension: 0.4,
+        fill: type === 'line',
+        pointRadius: 3,
         borderWidth: 2,
     }));
 }
@@ -231,8 +267,12 @@ function createChart(type) {
             },
             scales: {
                 x: { ticks: { color: '#64748B' }, grid: { color: '#F1F5F9' } },
-                y: { ticks: { color: '#64748B' }, grid: { color: '#F1F5F9' }, beginAtZero: true,
-                     title: { display: true, text: 'Temps (ms)', color: '#64748B' } }
+                y: {
+                    ticks: { color: '#64748B' },
+                    grid: { color: '#F1F5F9' },
+                    beginAtZero: true,
+                    title: { display: true, text: 'Temps (ms)', color: '#64748B' }
+                }
             }
         }
     });
@@ -240,17 +280,17 @@ function createChart(type) {
 
 function setChartType(type) {
     createChart(type);
-    document.getElementById('btn-line').style.background = type === 'line' ? '#1697C2' : '#fff';
-    document.getElementById('btn-line').style.color = type === 'line' ? '#fff' : '#64748B';
-    document.getElementById('btn-line').style.border = type === 'line' ? 'none' : '1px solid #CBD5E1';
-    document.getElementById('btn-bar').style.background = type === 'bar' ? '#1697C2' : '#fff';
-    document.getElementById('btn-bar').style.color = type === 'bar' ? '#fff' : '#64748B';
-    document.getElementById('btn-bar').style.border = type === 'bar' ? 'none' : '1px solid #CBD5E1';
+    document.getElementById('btn-line').style.background  = type === 'line' ? '#1697C2' : '#fff';
+    document.getElementById('btn-line').style.color       = type === 'line' ? '#fff' : '#64748B';
+    document.getElementById('btn-line').style.border      = type === 'line' ? 'none' : '1px solid #CBD5E1';
+    document.getElementById('btn-bar').style.background   = type === 'bar'  ? '#1697C2' : '#fff';
+    document.getElementById('btn-bar').style.color        = type === 'bar'  ? '#fff' : '#64748B';
+    document.getElementById('btn-bar').style.border       = type === 'bar'  ? 'none' : '1px solid #CBD5E1';
 }
 
 createChart('line');
 
-// Donut uptime
+// ── Donut uptime ─────────────────────────────────────────────────────────────
 new Chart(document.getElementById('uptimeDonut'), {
     type: 'doughnut',
     data: {
@@ -269,68 +309,7 @@ new Chart(document.getElementById('uptimeDonut'), {
     }
 });
 
-<!-- Disponibilité mois en cours -->
-<div class="card" style="margin-bottom:24px; padding:16px 24px;
-     display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#F0F9FF,#E0F2FE);">
-    <i class="fas fa-calendar-check" style="font-size:28px; color:#1697C2;"></i>
-    <div>
-        <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase;">
-            Disponibilité globale — mois en cours ({{ now()->format('F Y') }})
-        </div>
-        <div style="font-size:28px; font-weight:900;
-            color:{{ $uptimeMois >= 99 ? '#059669' : ($uptimeMois >= 95 ? '#D97706' : '#DC2626') }}">
-            {{ $uptimeMois }}%
-        </div>
-    </div>
-    <div style="margin-left:auto; text-align:right;">
-        <div style="font-size:12px; color:#64748B;">Calculé sur {{ now()->daysInMonth }} jours</div>
-    </div>
-</div>
-
-// Countdown refresh
-let countdown = 30;
-const el = document.getElementById('countdown');
-setInterval(() => {
-    countdown--;
-    if (el) el.textContent = countdown;
-    if (countdown <= 0) location.reload();
-}, 1000);
-
-// Check Now
-function checkNow(siteId, btn) {
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    btn.disabled = true;
-    fetch(`/sites/${siteId}/check-now`, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-    })
-    .then(r => r.json())
-    .then(data => {
-        btn.innerHTML = '<i class="fas fa-check"></i>';
-        setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; location.reload(); }, 1500);
-    })
-    .catch(() => { btn.innerHTML = orig; btn.disabled = false; });
-}
-
-// Histogramme 7 jours — utilise $sitesStatus pas $sites
-@php
-    $siteIds = $sitesStatus->pluck('id');
-    $weekData = [];
-    for($i = 6; $i >= 0; $i--) {
-        $day = now()->subDays($i);
-        $total = \App\Models\Verification::whereIn('site_id', $siteIds)
-            ->whereDate('checked_at'', $day)->count();
-            $total = \App\Models\Verification::whereIn('site_id', $siteIds)
-    ->whereDate('checked_at', $day)->count();
-$up = \App\Models\Verification::whereIn('site_id', $siteIds)
-    ->whereDate('checked_at', $day)->where('is_up', true)->count();
-$weekData[] = [
-    'x' => $day->format('D d/m'),
-    'y' => $total > 0 ? round($up/$total*100,1) : 0
-];
-    }
-@endphp
+// ── Histogramme 7 jours ───────────────────────────────────────────────────────
 const weekData = @json($weekData);
 new Chart(document.getElementById('weekChart'), {
     type: 'bar',
@@ -348,12 +327,42 @@ new Chart(document.getElementById('weekChart'), {
         plugins: { legend: { display: false } },
         scales: {
             x: { ticks: { color: '#64748B' }, grid: { display: false } },
-            y: { min: 0, max: 100,
-                 ticks: { color: '#64748B', callback: v => v+'%' },
-                 grid: { color: '#F1F5F9' } }
+            y: {
+                min: 0, max: 100,
+                ticks: { color: '#64748B', callback: v => v + '%' },
+                grid: { color: '#F1F5F9' }
+            }
         }
     }
 });
+
+// ── Countdown auto-refresh ────────────────────────────────────────────────────
+let countdown = 30;
+const el = document.getElementById('countdown');
+setInterval(() => {
+    countdown--;
+    if (el) el.textContent = countdown;
+    if (countdown <= 0) location.reload();
+}, 1000);
+
+// ── Check Now ─────────────────────────────────────────────────────────────────
+function checkNow(siteId, btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+    fetch(`/sites/${siteId}/check-now`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+    })
+    .then(r => r.json())
+    .then(() => {
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; location.reload(); }, 1500);
+    })
+    .catch(() => { btn.innerHTML = orig; btn.disabled = false; });
+}
+
+
 </script>
 
 <!-- ===== RAPPORT IA GEMINI ===== -->
@@ -422,6 +431,29 @@ new Chart(document.getElementById('weekChart'), {
     </div>
 </div>
 
+<script>
+(function() {
+    const rapportText = @json($aiRapport['rapport'] ?? '');
+    const rapportEl = document.getElementById('ai-rapport-content');
+    if (rapportEl && rapportText) {
+        let html = rapportText
+            .replace(/^#### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^---$/gm, '<hr>')
+            .replace(/^\*   (.+)$/gm, '<li style="margin-left:24px">$1</li>')
+            .replace(/^\*  (.+)$/gm, '<li style="margin-left:12px">$1</li>')
+            .replace(/^\* (.+)$/gm, '<li>$1</li>')
+            .replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+        rapportEl.innerHTML = html;
+    }
+})();
+</script>
+
 <style>
 #ai-rapport-content h1 { font-size:20px; font-weight:800; color:#0C3547; border-bottom:3px solid #1697C2; padding-bottom:10px; margin:24px 0 14px; }
 #ai-rapport-content h2 { font-size:16px; font-weight:700; color:#1697C2; margin:20px 0 10px; padding-left:12px; border-left:4px solid #1697C2; }
@@ -433,13 +465,6 @@ new Chart(document.getElementById('weekChart'), {
 #ai-rapport-content hr { border:none; border-top:1px solid #E0F2FE; margin:20px 0; }
 #ai-rapport-content blockquote { border-left:4px solid #1697C2; margin:12px 0; padding:10px 16px; background:#F0F9FF; border-radius:0 8px 8px 0; color:#1697C2; font-weight:600; }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-    marked.setOptions({ breaks: true, gfm: true });
-    const rapportText = @json($aiRapport['rapport'] ?? '');
-    document.getElementById('ai-rapport-content').innerHTML = marked.parse(rapportText);
-</script>
 
 @else
 <div style="margin-top:24px; background:linear-gradient(135deg, #F0F9FF, #E0F2FE);
@@ -459,7 +484,7 @@ new Chart(document.getElementById('weekChart'), {
 </div>
 @endif
 
-<!-- Fil des 10 derniers incidents (CDC Module 5) -->
+<!-- Fil des 10 derniers incidents -->
 @php
     $recentIncidents = \App\Models\Incident::with('site')
         ->whereIn('site_id', $sitesStatus->pluck('id'))
