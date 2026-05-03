@@ -24,9 +24,18 @@ class AgentController extends Controller {
         return back()->with('success', "Agent {$request->name} créé avec succès !");
     }
 
+    // 
+    
     public function toggle(User $user) {
-        $user->update(['is_active' => !$user->is_active]);
-        $status = $user->is_active ? 'activé' : 'désactivé';
-        return back()->with('success', "Compte de {$user->name} {$status}.");
-    }
+    // Mise à jour directe en SQL — bypass le fillable
+    User::where('id', $user->id)->update([
+        'is_active' => $user->is_active ? 0 : 1
+    ]);
+
+    // Recharge depuis la BDD pour avoir la vraie valeur
+    $user->refresh();
+    $status = $user->is_active ? 'activé' : 'désactivé';
+
+    return back()->with('success', "Compte de {$user->name} {$status} avec succès !");
+}
 }
