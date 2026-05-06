@@ -19,4 +19,16 @@ class Alerte extends Model {
     public function incident() {
         return $this->belongsTo(Incident::class);
     }
+
+    public function send(): bool
+{
+    try {
+        \Mail::to($this->sent_to)
+             ->send(new \App\Mail\AlerteIncidentMail($this));
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
+}
+
 }

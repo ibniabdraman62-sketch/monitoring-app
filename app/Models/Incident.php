@@ -23,4 +23,24 @@ class Incident extends Model {
     public function alertes() {
         return $this->hasMany(Alerte::class);
     }
+
+    public function resolve(): void
+{
+    $this->update([
+        'resolved_at' => now(),
+        'is_resolved'  => true,
+        'duration_min' => $this->started_at
+            ? (int) $this->started_at->diffInMinutes(now())
+            : 0,
+    ]);
+}
+
+public function getDuration(): int
+{
+    if ($this->resolved_at && $this->started_at)
+        return (int) $this->started_at->diffInMinutes($this->resolved_at);
+    return $this->started_at
+        ? (int) $this->started_at->diffInMinutes(now())
+        : 0;
+}
 }

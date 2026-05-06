@@ -42,6 +42,7 @@ class DashboardController extends Controller
                 ->where('checked_at', '>=', Carbon::now()->subHours(24))
                 ->orderBy('checked_at')
                 ->get();
+                // ->filter(fn($v, $k) => $k % 3 === 0); //// garde 1 point sur 3
             $graphData[] = [
                 'label' => $site->client_name,
                 'data'  => $verifs->map(fn($v) => [

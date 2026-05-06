@@ -6,4 +6,9 @@ class CronLog extends Model {
     public $timestamps = false;
     protected $fillable = ['command','status','duration_ms','sites_checked','errors_count','error_message','executed_at'];
     protected $casts = ['executed_at' => 'datetime'];
+
+    public function isSuccess(): bool
+{
+    return $this->status === 'success';
+}
 }

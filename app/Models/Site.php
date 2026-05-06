@@ -35,4 +35,16 @@ class Site extends Model {
     public function rapports() {
         return $this->hasMany(Rapport::class);
     }
+
+    public function getHealthScore(): int
+{
+    $last = $this->verifications()->latest('checked_at')->take(20)->get();
+    if ($last->isEmpty()) return 0;
+    $upCount = $last->where('is_up', true)->count();
+    $avgResponse = $last->avg('response_time_ms') ?? 0;
+    $uptimeScore = ($upCount / $last->count()) * 60;
+    $responseScore = $avgResponse < 500 ? 40 : ($avgResponse < 1000 ? 20 : 0);
+    return (int) min(100, $uptimeScore + $responseScore);
+}
+    
 }

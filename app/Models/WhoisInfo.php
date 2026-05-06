@@ -13,4 +13,11 @@ class WhoisInfo extends Model {
     public function site() {
         return $this->belongsTo(Site::class);
     }
+
+    public function isExpiringSoon(): bool
+{
+    return $this->domain_days_remaining !== null
+        && $this->domain_days_remaining < 30;
+}
+
 }

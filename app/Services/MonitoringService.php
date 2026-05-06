@@ -123,4 +123,31 @@ class MonitoringService
             $mail->to($user->email)->subject($subject);
         });
     }
+
+    public function calculateHealthScore(Site $site): int
+{
+    return $site->getHealthScore();
+}
+
+public function checkSSL(string $url): array
+{
+    try {
+        $host = parse_url($url, PHP_URL_HOST);
+        $context = stream_context_create([
+            'ssl' => ['capture_peer_cert' => true, 'verify_peer' => false]
+        ]);
+        $client = stream_socket_client(
+            "ssl://{$host}:443", $errno, $errstr, 10,
+            STREAM_CLIENT_CONNECT, $context
+        );
+        if (!$client) return ['valid' => false, 'days_remaining' => 0];
+        $params = stream_context_get_params($client);
+        $cert   = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
+        $expires = $cert['validTo_time_t'] ?? 0;
+        $days    = (int) ceil(($expires - time()) / 86400);
+        return ['valid' => $days > 0, 'days_remaining' => max(0, $days)];
+    } catch (\Exception $e) {
+        return ['valid' => false, 'days_remaining' => 0];
+    }
+}
 }

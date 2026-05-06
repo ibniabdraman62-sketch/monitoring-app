@@ -4,6 +4,8 @@ use Illuminate\Console\Command;
 use App\Models\Site;
 use App\Models\CronLog;
 use App\Services\MonitoringService;
+use App\Jobs\CheckUptimeJob;
+
 
 class CheckUptimeCommand extends Command {
     protected $signature   = 'monitor:check-uptime';
@@ -16,16 +18,11 @@ class CheckUptimeCommand extends Command {
         $errorMsg = '';
         $service = new MonitoringService();
 
-        foreach ($sites as $site) {
-            try {
-                $service->checkSite($site);
-                $this->line("OK: {$site->client_name}");
-            } catch (\Exception $e) {
-                $errors++;
-                $errorMsg .= "{$site->client_name}: {$e->getMessage()}\n";
-                $this->warn("ERR: {$site->client_name}");
-            }
-        }
+        // Dans handle()
+$sites = \App\Models\Site::where('is_active', true)->get();
+foreach ($sites as $site) {
+    CheckUptimeJob::dispatch($site);
+}
 
         CronLog::create([
             'command'       => 'monitor:check-uptime',

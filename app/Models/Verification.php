@@ -23,4 +23,11 @@ class Verification extends Model {
     public function site() {
         return $this->belongsTo(Site::class);
     }
+
+    public function isAnomaly(): bool
+{
+    $threshold = $this->site->threshold_ms ?? 2000;
+    return !$this->is_up || $this->response_time_ms > $threshold;
+}
+
 }
