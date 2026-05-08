@@ -20,6 +20,7 @@ class MonitoringService
         $responseTime = 0;
         $sslValid = null;
         $sslExpiresAt = null;
+        $sslDaysRemaining = null;
 
         try {
             $start = microtime(true);
@@ -36,7 +37,7 @@ class MonitoringService
         if ($site->ssl_check) {
             try {
                 $host = parse_url($site->url, PHP_URL_HOST);
-                $ssl = stream_context_create(['ssl' => ['capture_peer_cert' => true]]);
+                $ssl = stream_context_create(['ssl' => ['capture_peer_cert' => true, 'verify_peer' => false]]);
                 $socket = stream_socket_client(
                     "ssl://{$host}:443", $errno, $errstr, 10,
                     STREAM_CLIENT_CONNECT, $ssl
@@ -46,6 +47,9 @@ class MonitoringService
                     $cert = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
                     $sslValid = true;
                     $sslExpiresAt = Carbon::createFromTimestamp($cert['validTo_time_t'])->toDateString();
+                    $sslDaysRemaining = (int) ceil(($cert['validTo_time_t'] - time()) / 86400);
+                } else {
+                    $sslValid = false;
                 }
             } catch (\Exception $e) {
                 $sslValid = false;
@@ -54,13 +58,14 @@ class MonitoringService
 
         // Enregistrer la vérification
         Verification::create([
-            'site_id'          => $site->id,
-            'checked_at'       => now(),
-            'http_code'        => $httpCode,
-            'response_time_ms' => $responseTime,
-            'ssl_valid'        => $sslValid,
-            'ssl_expires_at'   => $sslExpiresAt,
-            'is_up'            => $isUp,
+            'site_id'            => $site->id,
+            'checked_at'         => now(),
+            'http_code'          => $httpCode,
+            'response_time_ms'   => $responseTime,
+            'ssl_valid'          => $sslValid,
+            'ssl_expires_at'     => $sslExpiresAt,
+            'ssl_days_remaining' => $sslDaysRemaining,
+            'is_up'              => $isUp,
         ]);
 
         // Gestion des incidents
@@ -82,6 +87,7 @@ class MonitoringService
             $openIncident->update([
                 'resolved_at'  => now(),
                 'duration_min' => $duration,
+                'is_resolved'  => true,
             ]);
             $this->sendAlert($site, $openIncident, 'resolved');
 
@@ -125,29 +131,29 @@ class MonitoringService
     }
 
     public function calculateHealthScore(Site $site): int
-{
-    return $site->getHealthScore();
-}
-
-public function checkSSL(string $url): array
-{
-    try {
-        $host = parse_url($url, PHP_URL_HOST);
-        $context = stream_context_create([
-            'ssl' => ['capture_peer_cert' => true, 'verify_peer' => false]
-        ]);
-        $client = stream_socket_client(
-            "ssl://{$host}:443", $errno, $errstr, 10,
-            STREAM_CLIENT_CONNECT, $context
-        );
-        if (!$client) return ['valid' => false, 'days_remaining' => 0];
-        $params = stream_context_get_params($client);
-        $cert   = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
-        $expires = $cert['validTo_time_t'] ?? 0;
-        $days    = (int) ceil(($expires - time()) / 86400);
-        return ['valid' => $days > 0, 'days_remaining' => max(0, $days)];
-    } catch (\Exception $e) {
-        return ['valid' => false, 'days_remaining' => 0];
+    {
+        return $site->getHealthScore();
     }
-}
+
+    public function checkSSL(string $url): array
+    {
+        try {
+            $host = parse_url($url, PHP_URL_HOST);
+            $context = stream_context_create([
+                'ssl' => ['capture_peer_cert' => true, 'verify_peer' => false]
+            ]);
+            $client = stream_socket_client(
+                "ssl://{$host}:443", $errno, $errstr, 10,
+                STREAM_CLIENT_CONNECT, $context
+            );
+            if (!$client) return ['valid' => false, 'days_remaining' => 0];
+            $params = stream_context_get_params($client);
+            $cert   = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
+            $expires = $cert['validTo_time_t'] ?? 0;
+            $days    = (int) ceil(($expires - time()) / 86400);
+            return ['valid' => $days > 0, 'days_remaining' => max(0, $days)];
+        } catch (\Exception $e) {
+            return ['valid' => false, 'days_remaining' => 0];
+        }
+    }
 }

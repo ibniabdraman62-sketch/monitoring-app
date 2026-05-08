@@ -8,10 +8,10 @@ class Verification extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'site_id', 'checked_at', 'http_code',
-        'response_time_ms', 'ssl_valid',
-        'ssl_expires_at', 'is_up'
-    ];
+    'site_id', 'checked_at', 'http_code',
+    'response_time_ms', 'ssl_valid',
+    'ssl_expires_at', 'ssl_days_remaining', 'is_up'
+];
 
     protected $casts = [
         'checked_at' => 'datetime',

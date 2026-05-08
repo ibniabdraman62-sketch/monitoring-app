@@ -19,7 +19,7 @@ class UserSeeder extends Seeder {
             ['email' => 'agent@softseven.ma'],
             [
                 'name'     => 'Agent Monitoring',
-                'password' => bcrypt('Agent@2027'),
+                'password' => bcrypt('Agent@2026'),
                 'role'     => 'agent',
             ]
         );
