@@ -260,6 +260,8 @@ Etudiant en Licence Informatique — Specialite IRM
 
 Faculte des Sciences et Techniques de Mohammedia (FSTM)
 
+mabroukachraf.fstm@gmail.com
+
 Role : Developpement Backend et Base de donnees
 
 ---
