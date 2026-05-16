@@ -29,9 +29,15 @@ class MonitoringService
             $httpCode = $response->getStatusCode();
             $isUp = $httpCode >= 200 && $httpCode < 400;
         } catch (RequestException $e) {
-            $httpCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : 0;
-            $isUp = false;
-        }
+    $httpCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : 0;
+    $isUp = false;
+} catch (\GuzzleHttp\Exception\ConnectException $e) {
+    $httpCode = 0;
+    $isUp = false;
+} catch (\Exception $e) {
+    $httpCode = 0;
+    $isUp = false;
+}
 
         // Vérification SSL
         if ($site->ssl_check) {

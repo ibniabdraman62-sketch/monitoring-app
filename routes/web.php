@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RapportController;
 use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\AgentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -59,6 +60,7 @@ Route::patch('/agents/{user}/toggle', [\App\Http\Controllers\AgentController::cl
     ->name('agents.toggle')->middleware(['auth','super_admin']);
     Route::post('/rapports/{site}/send-email', [\App\Http\Controllers\RapportController::class, 'sendEmail'])
     ->name('rapports.send-email')->middleware('auth');
+    Route::patch('/agents/{user}', [AgentController::class, 'update'])->name('agents.update');
 });
 
 require __DIR__.'/auth.php';

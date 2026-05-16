@@ -18,7 +18,8 @@
         <div style="font-size:14px; color:#64748B; margin-top:4px;">{{ auth()->user()->email }}</div>
         <div style="margin-top:12px;">
             <span class="badge badge-blue">
-                <i class="fas fa-shield-alt"></i> Administrateur
+                <i class="fas fa-shield-alt"></i>
+                {{ auth()->user()->role === 'super_admin' ? 'Super Administrateur' : 'Agent' }}
             </span>
         </div>
     </div>
@@ -73,7 +74,7 @@
     </div>
 
     <!-- Mot de passe -->
-    <div class="card" style="margin-bottom:20px;">
+    <div class="card">
         <div class="card-title">
             <i class="fas fa-lock" style="color:#1697C2;"></i> Mettre à jour le mot de passe
         </div>
@@ -130,37 +131,8 @@
         </form>
     </div>
 
-    <!-- Supprimer compte -->
-    <div class="card" style="border:1px solid #FCA5A5; background:#FFF5F5;">
-        <div class="card-title" style="color:#DC2626;">
-            <i class="fas fa-exclamation-triangle"></i> Zone dangereuse
-        </div>
-        <p style="font-size:13px; color:#64748B; margin-bottom:20px;">
-            Une fois votre compte supprimé, toutes les données seront définitivement effacées.
-        </p>
-
-        <form method="POST" action="{{ route('profile.destroy') }}"
-              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ?')">
-            @csrf @method('delete')
-
-            <div class="form-group">
-                <label class="form-label" style="color:#DC2626;">
-                    Confirmez votre mot de passe pour supprimer
-                </label>
-                <input type="password" name="password"
-                       class="form-input"
-                       style="border-color:#FCA5A5;"
-                       placeholder="Votre mot de passe">
-                @error('password', 'userDeletion')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <button type="submit" class="btn-primary btn-danger">
-                <i class="fas fa-trash"></i> Supprimer définitivement
-            </button>
-        </form>
-    </div>
+    {{-- Zone dangereuse SUPPRIMÉE sur demande de M. MOUMKINE --}}
+    {{-- L'administrateur ne peut pas supprimer son propre compte --}}
 
 </div>
 

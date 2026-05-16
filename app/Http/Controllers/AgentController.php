@@ -1,41 +1,70 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class AgentController extends Controller {
-    public function index() {
+class AgentController extends Controller
+{
+    public function index()
+    {
         return view('admin.agents');
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:8',
         ]);
+
         User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => bcrypt($request->password),
-            'role'      => 'agent',
-            'is_active' => true,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'password'          => bcrypt($request->password),
+            'role'              => 'agent',
+            'is_active'         => true,
+            'email_verified_at' => now(), // ← Email vérifié automatiquement à la création
         ]);
+
         return back()->with('success', "Agent {$request->name} créé avec succès !");
     }
 
-    // 
-    
-    public function toggle(User $user) {
-    // Mise à jour directe en SQL — bypass le fillable
-    User::where('id', $user->id)->update([
-        'is_active' => $user->is_active ? 0 : 1
-    ]);
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8',
+        ]);
 
-    // Recharge depuis la BDD pour avoir la vraie valeur
-    $user->refresh();
-    $status = $user->is_active ? 'activé' : 'désactivé';
+        $data = [
+            'name'  => $request->name,
+            'email' => $request->email,
+        ];
 
-    return back()->with('success', "Compte de {$user->name} {$status} avec succès !");
-}
+        // Met à jour le mot de passe seulement si fourni
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        User::where('id', $user->id)->update($data);
+
+        return back()->with('success', "Agent {$request->name} modifié avec succès !");
+    }
+
+    public function toggle(User $user)
+    {
+        // Mise à jour directe en SQL — bypass le fillable
+        User::where('id', $user->id)->update([
+            'is_active' => $user->is_active ? 0 : 1
+        ]);
+
+        // Recharge depuis la BDD pour avoir la vraie valeur
+        $user->refresh();
+        $status = $user->is_active ? 'activé' : 'désactivé';
+
+        return back()->with('success', "Compte de {$user->name} {$status} avec succès !");
+    }
 }
