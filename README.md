@@ -8,8 +8,8 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![License](https://img.shields.io/badge/License-Academic-blue?style=for-the-badge)](LICENSE)
 
-> **Projet de Fin d'Etudes — Licence Informatique, Reseaux et Multimedia (IRM)**
-> Faculte des Sciences et Techniques de Mohammedia (FSTM)
+> **Projet de Fin d'Etudes — Licence Informatique, Reseaux et Multimedia (IRM)**  
+> Faculte des Sciences et Techniques de Mohammedia (FSTM)  
 > Universite Hassan II de Casablanca — 2026
 
 </div>
@@ -18,13 +18,10 @@
 
 ## Presentation
 
-**MonitorPro** est une application web complete developpee dans le cadre d'un stage de fin
-d'etudes chez **Soft Seven Art**, agence digitale basee a Casablanca. Elle permet de surveiller
-en temps reel la disponibilite, les performances et la securite des sites web clients, avec
-envoi automatique d'alertes par email, generation de rapports PDF et assistant intelligent
-base sur l'IA.
+**MonitorPro** est une application web complete developpee dans le cadre d'un stage de fin d'etudes chez **Soft Seven Art**, agence digitale basee a Casablanca. Elle permet de surveiller en temps reel la disponibilite, les performances et la securite des sites web clients, avec envoi automatique d'alertes par email, generation de rapports PDF et assistant intelligent base sur l'IA.
 
 ### Objectifs
+
 - Surveiller automatiquement la disponibilite (uptime) des sites web toutes les 5 minutes
 - Mesurer les temps de reponse et detecter les ralentissements
 - Verifier la validite et l'expiration des certificats SSL
@@ -57,6 +54,7 @@ base sur l'IA.
 ## Stack Technique
 
 ### Backend
+
 | Technologie | Version | Role |
 |---|---|---|
 | Laravel | 10.x | Framework PHP MVC |
@@ -69,6 +67,7 @@ base sur l'IA.
 | Laravel Queues | — | Traitement asynchrone des jobs |
 
 ### Frontend
+
 | Technologie | Version | Role |
 |---|---|---|
 | Blade | — | Moteur de templates Laravel |
@@ -77,6 +76,7 @@ base sur l'IA.
 | Font Awesome | 6.5 | Icones |
 
 ### Services externes
+
 | Service | Role |
 |---|---|
 | Brevo SMTP | Envoi des emails d'alerte et de bienvenue (port 587 TLS) |
@@ -88,36 +88,48 @@ base sur l'IA.
 ---
 
 ## Architecture du monitoring
-Scheduler Laravel (php artisan schedule:work)
-├── monitor:check-uptime  (toutes les 5 min)
-│       └── CheckUptimeJob → HTTP GET → is_up + response_time
+
+```
+Scheduler Laravel  (php artisan schedule:work)
+│
+├── monitor:check-uptime          (toutes les 5 min)
+│       └── CheckUptimeJob
+│               ├── HTTP GET  →  is_up + response_time_ms
 │               ├── INSERT verifications
-│               └── Si anomalie → INSERT incidents → Alerte email
+│               └── Si anomalie  →  INSERT incidents  →  Alerte email
 │
-├── monitor:check-ssl     (toutes les heures)
-│       └── CheckSslJob → Handshake TLS → ssl_valid + ssl_expires_at
-│               └── Si expiration < 30j → Alerte email
+├── monitor:check-ssl             (toutes les heures)
+│       └── CheckSslJob
+│               ├── Handshake TLS  →  ssl_valid + ssl_expires_at
+│               └── Si expiration < 30j  →  Alerte email
 │
-├── monitor:check-whois   (chaque semaine)
-│       └── CheckWhoisJob → Serveur WHOIS → registrar + expiry_date
-│               └── Si expiration < 30j → Alerte email
+├── monitor:check-whois           (chaque semaine)
+│       └── CheckWhoisJob
+│               ├── Requete WHOIS  →  registrar + expiry_date
+│               └── Si expiration < 30j  →  Alerte email
 │
-├── monitor:send-weekly-report  (lundi 08h00)
-│       └── SendWeeklyReportJob → DomPDF → Email PDF
+├── monitor:send-weekly-report    (lundi 08h00)
+│       └── SendWeeklyReportJob
+│               └── DomPDF  →  Rapport PDF  →  Email
 │
-└── monitor:cleanup       (chaque jour 00h00)
-└── Nettoyage des anciennes donnees
-Queue Worker (php artisan queue:work --tries=3)
+└── monitor:cleanup               (chaque jour 00h00)
+        └── Nettoyage des anciennes donnees
+
+Queue Worker  (php artisan queue:work --tries=3)
 └── Consomme les jobs depuis la table "jobs"
-└── En cas d'echec → table "failed_jobs" (apres 3 tentatives)
+        └── En cas d'echec  →  table "failed_jobs" (apres 3 tentatives)
+```
 
 ### Architecture du Chatbot IA
+
+```
 Navigateur (JS fetch)
-└── POST /chatbot/send  [route Laravel — proxy anti-CORS]
-└── HTTP::post() → n8n Cloud webhook
-└── Workflow n8n → Google Gemini API
-└── Reponse formatee (Markdown, tableaux)
-└── Retour au navigateur → Affichage
+└── POST /chatbot/send   [route Laravel — proxy anti-CORS]
+        └── Http::post()  →  n8n Cloud webhook
+                └── Workflow n8n  →  Google Gemini API
+                        └── Reponse formatee (Markdown, tableaux)
+                                └── Retour navigateur  →  Affichage
+```
 
 ---
 
@@ -132,36 +144,39 @@ Navigateur (JS fetch)
 | Gestion des clients | ✅ | ❌ | ❌ |
 | Supervision Cron Jobs | ✅ | ❌ | ❌ |
 | Assistant IA | ✅ | ✅ | ✅ |
-| Rapports et alertes | ✅ | ✅ | Les siens |
+| Rapports et alertes | ✅ | ✅ | Les siens uniquement |
 
 ---
 
 ## Structure de la base de donnees
 
-monitoring_db  (13 tables)
+```
+monitoring_db  —  13 tables
 │
-├── Tables metier
-│   ├── users              → Utilisateurs (super_admin, agent, client)
-│   ├── sites              → Sites web surveilles, rattaches a un client
-│   ├── verifications      → Resultats de chaque verification (uptime + SSL)
-│   ├── whois_info         → Informations WHOIS et expiration des domaines
-│   ├── incidents          → Pannes et lenteurs detectees
-│   ├── alertes            → Emails d'alerte envoyes
-│   ├── rapports           → Rapports PDF generes
-│   └── cron_logs          → Historique d'execution des taches planifiees
+├── Tables metier (8)
+│   ├── users                →  Utilisateurs (super_admin / agent / client)
+│   ├── sites                →  Sites web surveilles, rattaches a un client
+│   ├── verifications        →  Resultats de chaque verification (uptime + SSL)
+│   ├── whois_info           →  Informations WHOIS et expiration des domaines
+│   ├── incidents            →  Pannes et lenteurs detectees
+│   ├── alertes              →  Emails d'alerte envoyes
+│   ├── rapports             →  Rapports PDF generes
+│   └── cron_logs            →  Historique d'execution des taches planifiees
 │
-└── Tables systeme Laravel
-├── jobs                      → File d'attente des jobs asynchrones
-├── failed_jobs               → Jobs en echec
-├── migrations                → Historique des migrations
-├── password_reset_tokens     → Tokens de reinitialisation
-└── personal_access_tokens    → Tokens d'acces API
+└── Tables systeme Laravel (5)
+    ├── jobs                      →  File d'attente des jobs asynchrones
+    ├── failed_jobs               →  Jobs en echec
+    ├── migrations                →  Historique des migrations
+    ├── password_reset_tokens     →  Tokens de reinitialisation
+    └── personal_access_tokens    →  Tokens d'acces API
+```
 
 ---
 
 ## Installation
 
 ### Prerequis
+
 - [Laragon](https://laragon.org) (Apache + MySQL + PHP 8.3)
 - [Composer](https://getcomposer.org) 2.x
 - [Node.js](https://nodejs.org) 18+ et npm
@@ -193,14 +208,14 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 # 6. Creer la base de donnees "monitoring_db" dans MySQL
-# Puis executer les migrations
+# puis executer les migrations
 php artisan migrate
 
 # 7. Creer le lien symbolique pour le stockage
 php artisan storage:link
 ```
 
-### Configuration Email (Brevo SMTP)
+### Configuration Email — Brevo SMTP
 
 ```env
 MAIL_MAILER=smtp
@@ -214,16 +229,16 @@ MAIL_FROM_NAME="MonitorPro"
 ```
 
 > Brevo (ex-Sendinblue) est utilise pour l'envoi de tous les emails :
-> alertes, rapports hebdomadaires et emails de bienvenue clients.
+> alertes automatiques, rapports hebdomadaires et emails de bienvenue clients.
 
 ---
 
 ## Lancement
 
-Ouvrir **trois terminaux** dans le dossier du projet :
+Ouvrir **deux terminaux** dans le dossier du projet apres avoir demarre Laragon :
 
 ```bash
-# 1. Laragon : demarrer Apache + MySQL depuis l'interface graphique
+# Laragon : demarrer Apache + MySQL depuis l'interface graphique
 
 # Terminal 1 — Scheduler (taches automatiques de monitoring)
 cd C:\laragon\www\monitoring-app
@@ -251,44 +266,46 @@ ngrok http --host-header=rewrite monitoring-app.test:80
 | Agent | agent@softseven.ma | *(voir UserSeeder)* |
 | Client (exemple) | client@test.ma | *(defini a la creation)* |
 
-> Les clients sont crees directement depuis l'interface "Gestion Clients"
-> ou lors de l'ajout d'un site ("Nouveau client" dans le formulaire).
+> Les clients sont crees depuis l'interface **Gestion Clients** ou lors de l'ajout
+> d'un site via le bouton **"Nouveau client"** dans le formulaire.
 
 ---
 
 ## Structure du projet
 
+```
 monitoring-app/
 ├── app/
 │   ├── Http/
-│   │   ├── Controllers/         → Dashboard, Site, Incident, Alerte, Rapport, Agent...
-│   │   ├── Middleware/          → CheckActiveUser.php, ClientMiddleware.php
-│   │   └── Kernel.php           → Enregistrement des middlewares
-│   ├── Jobs/                    → CheckUptimeJob, CheckSslJob, CheckWhoisJob,
-│   │                              SendWeeklyReportJob
-│   ├── Mail/                    → AlerteDownMail, AlerteSlowMail, AlerteSslMail,
-│   │                              AlerteDomainMail, AlerteResolvedMail,
-│   │                              RapportHebdoMail, ClientWelcomeMail
-│   ├── Models/                  → User, Site, Verification, Incident, Alerte,
-│   │                              Rapport, CronLog, WhoisInfo
-│   └── Services/                → MonitoringService.php
+│   │   ├── Controllers/     →  Dashboard, Site, Incident, Alerte, Rapport, Agent...
+│   │   ├── Middleware/      →  CheckActiveUser.php, ClientMiddleware.php
+│   │   └── Kernel.php       →  Enregistrement des middlewares
+│   ├── Jobs/                →  CheckUptimeJob, CheckSslJob,
+│   │                           CheckWhoisJob, SendWeeklyReportJob
+│   ├── Mail/                →  AlerteDownMail, AlerteSlowMail, AlerteSslMail,
+│   │                           AlerteDomainMail, AlerteResolvedMail,
+│   │                           RapportHebdoMail, ClientWelcomeMail
+│   ├── Models/              →  User, Site, Verification, Incident,
+│   │                           Alerte, Rapport, CronLog, WhoisInfo
+│   └── Services/            →  MonitoringService.php
 ├── resources/
 │   └── views/
-│       ├── layouts/             → monitoring.blade.php (layout principal)
-│       ├── auth/                → login, forgot-password, reset-password
-│       ├── admin/               → cron_jobs, agents, clients
-│       ├── sites/               → index, show, create, edit
-│       ├── alertes/             → index
-│       ├── incidents/           → index
-│       ├── rapports/            → index, pdf
-│       ├── chatbot/             → index
-│       ├── profile/             → edit
-│       └── emails/              → alerte-down, alerte-slow, alerte-ssl,
-│                                   alerte-domain, alerte-resolved,
-│                                   rapport-hebdo, client-welcome
+│       ├── layouts/         →  monitoring.blade.php (layout principal)
+│       ├── auth/            →  login, forgot-password, reset-password
+│       ├── admin/           →  cron_jobs, agents, clients
+│       ├── sites/           →  index, show, create, edit
+│       ├── alertes/         →  index
+│       ├── incidents/       →  index
+│       ├── rapports/        →  index, pdf
+│       ├── chatbot/         →  index
+│       ├── profile/         →  edit
+│       └── emails/          →  alerte-down, alerte-slow, alerte-ssl,
+│                                alerte-domain, alerte-resolved,
+│                                rapport-hebdo, client-welcome
 ├── database/
-│   └── migrations/              → 13 tables MySQL
-└── routes/web.php               → Routes de l'application + proxy chatbot
+│   └── migrations/          →  13 tables MySQL
+└── routes/web.php           →  Routes de l'application + proxy chatbot
+```
 
 ---
 
@@ -303,12 +320,14 @@ php artisan monitor:send-weekly-report
 php artisan monitor:cleanup
 
 # Vider les caches
-php artisan config:clear && php artisan cache:clear && php artisan view:clear
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
 
 # Lister toutes les routes
 php artisan route:list
 
-# Acceder a Tinker
+# Acceder a Tinker (console interactive)
 php artisan tinker
 ```
 
@@ -318,26 +337,24 @@ php artisan tinker
 
 <div align="center">
 
-**ABDRAMAN IBNI ABDRAMAN**
-Etudiant en Licence IRM — FSTM
-ibniabdraman62@gmail.com
-Role : Developpement full-stack, integration IA, securite
+**ABDRAMAN IBNI ABDRAMAN**  
+Etudiant en Licence IRM — FSTM  
+ibniabdraman62@gmail.com  
+*Role : Developpement full-stack, integration IA, securite*
 
 ---
 
-**ACHRAF MABROUK**
-Etudiant en Licence IRM — FSTM
-mabroukachraf.fstm@gmail.com
-Role : Developpement backend, base de donnees, jobs asynchrones
+**ACHRAF MABROUK**  
+Etudiant en Licence IRM — FSTM  
+mabroukachraf.fstm@gmail.com  
+*Role : Developpement backend, base de donnees, jobs asynchrones*
 
 ---
 
 Stage effectue chez **Soft Seven Art** — Casablanca, Maroc
 
-**Encadrant entreprise :** M. Jail OTHMANE — Soft Seven Art
-
-**Encadrant academique :** Pr. Noureddine MOUMKINE — FSTM
-
+**Encadrant entreprise :** M. Jail OTHMANE — Soft Seven Art  
+**Encadrant academique :** Pr. Noureddine MOUMKINE — FSTM  
 Universite Hassan II de Casablanca
 
 </div>
@@ -346,6 +363,6 @@ Universite Hassan II de Casablanca
 
 <div align="center">
 
-Projet realise dans le cadre du stage de fin d'etudes — Annee universitaire 2025-2026
+*Projet realise dans le cadre du stage de fin d'etudes — Annee universitaire 2025-2026*
 
 </div>
