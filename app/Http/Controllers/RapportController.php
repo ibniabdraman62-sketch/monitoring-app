@@ -10,7 +10,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class RapportController extends Controller {
 
     public function index() {
-        $sites    = Site::where('user_id', auth()->id())->get();
+        $user = auth()->user();
+
+if ($user->role === 'client') {
+    $sites = \App\Models\Site::where('user_id', $user->id)->get();
+} else {
+    $sites = \App\Models\Site::all();
+}
         $rapports = Rapport::with('site')
             ->whereHas('site', fn($q) => $q->where('user_id', auth()->id()))
             ->latest('generated_at')->get();

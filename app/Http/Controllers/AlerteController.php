@@ -27,7 +27,13 @@ class AlerteController extends Controller {
 }
 
     $alertes = $query->paginate(20);
-    $sites = \App\Models\Site::where('user_id', auth()->id())->get();
+    $user = auth()->user();
+
+if ($user->role === 'client') {
+    $sites = \App\Models\Site::where('user_id', $user->id)->get();
+} else {
+    $sites = \App\Models\Site::all();
+}
     $stats = [
         'total'    => \App\Models\Alerte::count(),
         'down'     => \App\Models\Alerte::where('type','down')->count(),

@@ -9,71 +9,95 @@ use Illuminate\Support\Facades\Auth;
 class SiteController extends Controller
 {
     public function index() {
-        $search = request('search');
-        $statut = request('statut'); // nouveau filtre
+    $search = request('search');
+    $statut = request('statut');
 
-        $sites = Site::where('user_id', Auth::id())
-            ->when($search, function($q) use ($search) {
-                $q->where(function($q2) use ($search) {
-                    $q2->where('client_name', 'LIKE', "%{$search}%")
-                       ->orWhere('url', 'LIKE', "%{$search}%");
-                });
-            })
-            ->get();
+    $user = Auth::user();
 
-        // Filtre par statut (appliqué en PHP après récupération)
-        if ($statut) {
-            $sites = $sites->filter(function($site) use ($statut) {
-                $lastVerif = $site->verifications()->latest('checked_at')->first();
-                switch ($statut) {
-                    case 'online':
-                        return $lastVerif && $lastVerif->is_up &&
-                               $lastVerif->response_time_ms <= $site->response_threshold_ms;
-                    case 'offline':
-                        return $lastVerif && !$lastVerif->is_up;
-                    case 'slow':
-                        return $lastVerif && $lastVerif->is_up &&
-                               $lastVerif->response_time_ms > $site->response_threshold_ms;
-                    case 'ssl':
-                        if (!$lastVerif || !$lastVerif->ssl_expires_at) return false;
-                        return now()->diffInDays($lastVerif->ssl_expires_at, false) < 30;
-                    case 'inactive':
-                        return !$site->is_active;
-                }
-                return true;
-            });
-        }
-
-        return view('sites.index', compact('sites'));
+    // ─── Choix de la requête selon le rôle ───
+    if ($user->role === 'client') {
+        // Client : voit UNIQUEMENT ses propres sites
+        $query = Site::where('user_id', $user->id);
+    } else {
+        // Super Admin + Agent : voient TOUS les sites
+        $query = Site::query();
     }
 
+    $sites = $query
+        ->when($search, function($q) use ($search) {
+            $q->where(function($q2) use ($search) {
+                $q2->where('client_name', 'LIKE', "%{$search}%")
+                   ->orWhere('url', 'LIKE', "%{$search}%");
+            });
+        })
+        ->get();
+
+    // Filtre par statut (appliqué en PHP après récupération)
+    if ($statut) {
+        $sites = $sites->filter(function($site) use ($statut) {
+            $lastVerif = $site->verifications()->latest('checked_at')->first();
+            switch ($statut) {
+                case 'online':
+                    return $lastVerif && $lastVerif->is_up &&
+                           $lastVerif->response_time_ms <= $site->response_threshold_ms;
+                case 'offline':
+                    return $lastVerif && !$lastVerif->is_up;
+                case 'slow':
+                    return $lastVerif && $lastVerif->is_up &&
+                           $lastVerif->response_time_ms > $site->response_threshold_ms;
+                case 'ssl':
+                    if (!$lastVerif || !$lastVerif->ssl_expires_at) return false;
+                    return now()->diffInDays($lastVerif->ssl_expires_at, false) < 30;
+                case 'inactive':
+                    return !$site->is_active;
+            }
+            return true;
+        });
+    }
+
+    return view('sites.index', compact('sites'));
+}
+
     public function create() {
-        return view('sites.create');
+        if (auth()->user()->role === 'client') {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+    return view('sites.create');
+        
     }
 
     public function store(Request $request) {
-        $request->validate([
-            'client_name'           => 'required|string|max:255',
-            'url'                   => 'required|url',
-            'frequency_min'         => 'required|integer|min:1',
-            'response_threshold_ms' => 'required|integer|min:100',
+        if (auth()->user()->role === 'client') {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+    // return view('sites.create');
+        $validated = $request->validate([
+        'user_id'                => 'required|exists:users,id',
+        'client_name'            => 'required|string|max:255',
+        'client_email'           => 'nullable|email',
+        'url'                    => 'required|url|max:500',
+        'frequency_min'          => 'required|integer|in:5,10,15,30',
+        'response_threshold_ms'  => 'required|integer|min:500|max:30000',
+        'notify_emails'          => 'nullable|string',
+        'ssl_check'              => 'nullable|boolean',
+        'whois_check'            => 'nullable|boolean',
         ]);
 
         Site::create([
-            'user_id'               => Auth::id(),
-            'client_name'           => $request->client_name,
-            'url'                   => $request->url,
-            'frequency_min'         => $request->frequency_min,
-            'response_threshold_ms' => $request->response_threshold_ms,
-            'ssl_check'             => $request->has('ssl_check'),
-            'is_active'             => true,
-            'notify_emails'         => $request->notify_emails,
-            'client_email'          => $request->client_email,
-            'whois_check'           => $request->has('whois_check') ? 1 : 0,
-        ]);
+        'user_id'               => $validated['user_id'],
+        'client_name'           => $validated['client_name'],
+        'client_email'          => $validated['client_email'] ?? null,
+        'url'                   => $validated['url'],
+        'frequency_min'         => $validated['frequency_min'],
+        'response_threshold_ms' => $validated['response_threshold_ms'],
+        'notify_emails'         => $validated['notify_emails'] ?? null,
+        'ssl_check'             => $request->boolean('ssl_check'),
+        'whois_check'           => $request->boolean('whois_check'),
+        'is_active'             => true,
+    ]);
 
-        return redirect()->route('sites.index')
-            ->with('success', 'Site ajouté avec succès !');
+            return redirect()->route('sites.index')->with('success', 'Site ajouté avec succès.');
+
     }
 
     public function show(Site $site) {
@@ -85,10 +109,18 @@ class SiteController extends Controller
     }
 
     public function edit(Site $site) {
+        if (auth()->user()->role === 'client') {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+    // return view('sites.create');
         return view('sites.edit', compact('site'));
     }
 
     public function update(Request $request, Site $site) {
+        if (auth()->user()->role === 'client') {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+    // return view('sites.create');
         $request->validate([
             'client_name'           => 'required|string|max:255',
             'url'                   => 'required|url',
@@ -112,12 +144,20 @@ class SiteController extends Controller
     }
 
     public function destroy(Site $site) {
+        if (auth()->user()->role === 'client') {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+    // return view('sites.create');
         $site->delete();
         return redirect()->route('sites.index')
             ->with('success', 'Site supprimé avec succès !');
     }
 
     public function toggle(Site $site) {
+        if (auth()->user()->role === 'client') {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+    //E return view('sites.create');
         $site->update(['is_active' => !$site->is_active]);
         return back()->with('success', 'Statut mis à jour !');
     }

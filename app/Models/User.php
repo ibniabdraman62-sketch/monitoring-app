@@ -42,4 +42,9 @@ class User extends Authenticatable
     public function isAgent(): bool {
         return $this->role === 'agent';
     }
+
+//     public function sites(){
+//     return $this->hasMany(Site::class);
+// }
+
 }

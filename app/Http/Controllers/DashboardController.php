@@ -11,7 +11,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $sites   = Site::where('user_id', Auth::id())->get();
+        $user = auth()->user();
+
+if ($user->role === 'client') {
+    $sites = \App\Models\Site::where('user_id', $user->id)->get();
+} else {
+    $sites = \App\Models\Site::all();
+}
         $siteIds = $sites->pluck('id');
 
         // KPIs

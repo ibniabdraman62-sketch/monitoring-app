@@ -3,427 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonitorPro — Connexion</title>
+    <title>Connexion — MonitorPro</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-soft7art.svg') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', 'Arial', sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0C3547 0%, #0a2a38 40%, #1697C2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FBF8F0 0%, #F5EFE0 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 20px; -webkit-font-smoothing: antialiased;
         }
 
-        /* Cercles décoratifs en arrière-plan */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 600px; height: 600px;
-            background: rgba(22,151,194,0.08);
-            border-radius: 50%;
-            top: -200px; right: -200px;
-            animation: float 8s ease-in-out infinite;
-        }
-        body::after {
-            content: '';
-            position: absolute;
-            width: 400px; height: 400px;
-            background: rgba(83,234,253,0.06);
-            border-radius: 50%;
-            bottom: -150px; left: -150px;
-            animation: float 10s ease-in-out infinite reverse;
+        .auth-container {
+            display: grid; grid-template-columns: 1fr 460px;
+            width: 100%; max-width: 960px; min-height: 580px;
+            background: #FFFFFF; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(61,47,31,0.12);
+            border: 1px solid #E8DFC9;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-20px) scale(1.02); }
+        .left-panel {
+            background: linear-gradient(150deg, #2C5F8B 0%, #4078A9 100%);
+            color: #FFFFFF; padding: 48px 44px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden;
         }
+        .left-panel::before { content:''; position:absolute; top:-100px; right:-100px; width:300px; height:300px; background:rgba(255,255,255,0.06); border-radius:50%; }
+        .left-panel::after  { content:''; position:absolute; bottom:-80px; left:-80px; width:240px; height:240px; background:rgba(255,255,255,0.05); border-radius:50%; }
 
-        /* Points lumineux */
-        .dots {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        .dot {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(83,234,253,0.15);
-            animation: blink 3s ease-in-out infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.3); }
-        }
+        .brand { display:flex; align-items:center; gap:12px; position:relative; }
+        .brand img { width:42px; height:42px; background:rgba(255,255,255,0.15); border-radius:10px; padding:2px; }
+        .brand-text { line-height:1.2; }
+        .brand-title { font-size:18px; font-weight:700; }
+        .brand-subtitle { font-size:11px; opacity:0.7; text-transform:uppercase; letter-spacing:0.6px; font-weight:500; }
 
-        .container {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            gap: 0;
-            width: 900px;
-            max-width: 95vw;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-        }
+        .left-content { position: relative; }
+        .left-headline { font-size:28px; font-weight:700; line-height:1.25; margin-bottom:12px; letter-spacing:-0.5px; }
+        .left-text { font-size:14px; line-height:1.7; opacity:0.85; margin-bottom:28px; }
 
-        /* Panel gauche — branding */
-        .panel-left {
-            width: 380px;
-            flex-shrink: 0;
-            background: linear-gradient(160deg, #0C3547, #0d4060);
-            padding: 48px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border-right: 1px solid rgba(83,234,253,0.2);
-        }
+        .features-list { display:flex; flex-direction:column; gap:12px; }
+        .feature { display:flex; align-items:center; gap:10px; font-size:13px; opacity:0.9; }
+        .feature i { width:22px; height:22px; background:rgba(255,255,255,0.15); border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 40px;
-        }
-        .logo-icon {
-            width: 52px; height: 52px;
-            background: linear-gradient(135deg, #53EAFD, #1697C2);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 8px 24px rgba(83,234,253,0.3);
-        }
-        .logo-text .name { font-size: 22px; font-weight: 900; color: #fff; }
-        .logo-text .sub  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+        .left-footer { position:relative; font-size:11.5px; opacity:0.7; }
 
-        .hero-title {
-            font-size: 28px; font-weight: 800;
-            color: #fff; line-height: 1.3;
-            margin-bottom: 16px;
-        }
-        .hero-title span { color: #53EAFD; }
+        .right-panel { padding: 56px 48px; display:flex; flex-direction:column; justify-content:center; background:#FFFFFF; }
+        .form-title { font-size:22px; font-weight:700; color:#3D2F1F; margin-bottom:6px; letter-spacing:-0.3px; }
+        .form-subtitle { font-size:13.5px; color:#8B7855; margin-bottom:30px; }
 
-        .hero-desc {
-            font-size: 13px; color: rgba(255,255,255,0.6);
-            line-height: 1.8; margin-bottom: 36px;
+        .alert {
+            padding: 10px 14px; border-radius: 8px; font-size: 12.5px;
+            margin-bottom: 18px; display: flex; gap: 8px; align-items: flex-start;
         }
+        .alert-error { background:#F2DCD8; color:#B66258; border:1px solid #E5BAB3; }
+        .alert-success { background:#DFF0E1; color:#4A8C5A; border:1px solid #B0DBB6; }
 
-        .features { display: flex; flex-direction: column; gap: 14px; }
-        .feature {
-            display: flex; align-items: center; gap: 12px;
-        }
-        .feature-icon {
-            width: 34px; height: 34px;
-            background: rgba(22,151,194,0.2);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .feature-icon i { font-size: 13px; color: #53EAFD; }
-        .feature-text { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
-
-        .footer-brand {
-            font-size: 11px; color: rgba(255,255,255,0.3);
-            margin-top: 32px;
-        }
-
-        /* Panel droit — formulaire */
-        .panel-right {
-            flex: 1;
-            background: #fff;
-            padding: 48px 44px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .form-header { margin-bottom: 32px; }
-        .form-header h2 {
-            font-size: 24px; font-weight: 800; color: #0C3547;
-            margin-bottom: 6px;
-        }
-        .form-header p { font-size: 13px; color: #64748B; }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label {
-            display: block; font-size: 13px; font-weight: 600;
-            color: #334155; margin-bottom: 8px;
-        }
-
-        .input-wrapper { position: relative; }
-        .input-icon {
-            position: absolute; left: 14px; top: 50%;
-            transform: translateY(-50%);
-            color: #94A3B8; font-size: 14px;
-        }
+        .form-group { margin-bottom: 18px; }
+        .form-label { display:block; font-size:12px; font-weight:600; color:#5C4B36; margin-bottom:7px; }
+        .input-group { position: relative; }
+        .input-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #B5A684; }
         .form-input {
-            width: 100%;
-            background: #F8FAFC;
-            border: 1.5px solid #E2E8F0;
-            border-radius: 10px;
-            padding: 12px 14px 12px 40px;
-            font-size: 14px; color: #0F172A;
-            outline: none;
-            transition: all 0.2s;
+            width: 100%; padding: 11px 14px 11px 40px;
+            border: 1px solid #D9CDB0; border-radius: 8px;
+            font-size: 14px; color: #3D2F1F; outline: none;
+            transition: border-color .15s, box-shadow .15s; font-family: inherit;
         }
-        .form-input:focus {
-            border-color: #1697C2;
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(22,151,194,0.12);
-        }
+        .form-input:focus { border-color: #5B95C4; box-shadow: 0 0 0 3px rgba(91,149,196,0.12); }
 
-        .remember-row {
-            display: flex; align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-        .remember-label {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 13px; color: #64748B; cursor: pointer;
-        }
-        .remember-label input[type="checkbox"] {
-            width: 16px; height: 16px;
-            accent-color: #1697C2;
-            cursor: pointer;
-        }
-        .forgot-link {
-            font-size: 13px; color: #1697C2;
-            text-decoration: none; font-weight: 600;
-        }
+        .form-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; font-size:12.5px; }
+        .checkbox-wrapper { display:flex; align-items:center; gap:7px; color:#5C4B36; cursor:pointer; }
+        .forgot-link { color:#5B95C4; text-decoration:none; font-weight:600; }
         .forgot-link:hover { text-decoration: underline; }
 
-        .btn-login {
-            width: 100%;
-            background: linear-gradient(135deg, #0C3547, #1697C2);
-            color: #fff;
-            border: none; border-radius: 10px;
-            padding: 14px;
-            font-size: 15px; font-weight: 700;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all 0.2s;
-            box-shadow: 0 8px 24px rgba(22,151,194,0.35);
+        .btn-submit {
+            width: 100%; padding: 12px; background: #5B95C4; color: #FFFFFF;
+            border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: background .15s; font-family: inherit;
         }
-        .btn-login:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 32px rgba(22,151,194,0.45);
-        }
-        .btn-login:active { transform: translateY(0); }
+        .btn-submit:hover { background: #4078A9; }
 
-        .error-box {
-            background: #FEE2E2; border: 1px solid #FCA5A5;
-            color: #991B1B; padding: 12px 16px;
-            border-radius: 10px; margin-bottom: 20px;
-            font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
-        }
+        .form-footer { text-align:center; margin-top:28px; font-size:11.5px; color:#B5A684; }
 
-        .divider {
-            border: none; border-top: 1px solid #F1F5F9;
-            margin: 28px 0;
-        }
-
-        .accounts-hint {
-            background: #F0F9FF; border: 1px solid #BAE6FD;
-            border-radius: 10px; padding: 14px 16px;
-        }
-        .accounts-hint .hint-title {
-            font-size: 11px; font-weight: 700; color: #0369A1;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .account-row {
-            display: flex; justify-content: space-between;
-            font-size: 11px; color: #334155; margin-bottom: 4px;
-        }
-        .account-row .role {
-            font-weight: 700; color: #0C3547;
-            background: #E0F2FE; padding: 1px 8px;
-            border-radius: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .container { flex-direction: column; width: 95vw; }
-            .panel-left { width: 100%; padding: 32px 28px; }
-            .panel-right { padding: 32px 28px; }
-            .features { display: none; }
-        }
+        @media (max-width: 900px) { .auth-container { grid-template-columns: 1fr; max-width: 460px; } .left-panel { display: none; } }
     </style>
 </head>
 <body>
 
-<!-- Points décoratifs -->
-<div class="dots">
-    <div class="dot" style="width:8px;height:8px;top:15%;left:10%;animation-delay:0s;"></div>
-    <div class="dot" style="width:5px;height:5px;top:35%;left:20%;animation-delay:1s;"></div>
-    <div class="dot" style="width:6px;height:6px;top:65%;left:8%;animation-delay:2s;"></div>
-    <div class="dot" style="width:4px;height:4px;top:80%;left:25%;animation-delay:0.5s;"></div>
-    <div class="dot" style="width:7px;height:7px;top:20%;right:15%;animation-delay:1.5s;"></div>
-    <div class="dot" style="width:5px;height:5px;top:50%;right:10%;animation-delay:2.5s;"></div>
-    <div class="dot" style="width:9px;height:9px;top:75%;right:20%;animation-delay:0.8s;"></div>
-</div>
+<div class="auth-container">
 
-<div class="container">
-
-    <!-- Panel gauche — Branding -->
-    <div class="panel-left">
-        <div>
-            <div class="logo-area">
-                <div class="logo-icon">📡</div>
-                <div class="logo-text">
-                    <div class="name">MonitorPro</div>
-                    <div class="sub">Soft Seven Art — Casablanca</div>
-                </div>
-            </div>
-
-            <div class="hero-title">
-                Surveillance<br>
-                <span>intelligente</span><br>
-                de vos sites web
-            </div>
-
-            <div class="hero-desc">
-                Monitorer, alerter et analyser vos
-                infrastructures web en temps reel,
-                24h/24 et 7j/7.
-            </div>
-
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon"><i class="fas fa-heartbeat"></i></div>
-                    <div class="feature-text">Verification uptime toutes les 5 minutes</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
-                    <div class="feature-text">Alertes email instantanees en cas de panne</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
-                    <div class="feature-text">Analyse intelligente Google Gemini AI</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon"><i class="fas fa-lock"></i></div>
-                    <div class="feature-text">Surveillance SSL et expiration domaines</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <div class="feature-text">Rapports PDF et historiques detailles</div>
-                </div>
+    <div class="left-panel">
+        <div class="brand">
+            <img src="{{ asset('images/logo-soft7art.svg') }}" alt="Soft7Art">
+            <div class="brand-text">
+                <div class="brand-title">MonitorPro</div>
+                <div class="brand-subtitle">Soft Seven Art</div>
             </div>
         </div>
 
-        <div class="footer-brand">
-            © 2026 Soft Seven Art — FST Mohammedia
+        <div class="left-content">
+            <h1 class="left-headline">Plateforme de monitoring intelligente</h1>
+            <p class="left-text">
+                Surveillance en temps réel de l'infrastructure web,
+                alertes automatiques et analyse intelligente assistée par IA.
+            </p>
+
+            <div class="features-list">
+                <div class="feature"><i class="fas fa-check"></i> Vérifications automatiques toutes les 5 minutes</div>
+                <div class="feature"><i class="fas fa-check"></i> Surveillance des certificats SSL et domaines</div>
+                <div class="feature"><i class="fas fa-check"></i> Rapports automatisés et alertes par email</div>
+                <div class="feature"><i class="fas fa-check"></i> Assistant conversationnel intégré</div>
+            </div>
         </div>
+
+        <div class="left-footer">© 2026 Soft Seven Art — Casablanca, Maroc</div>
     </div>
 
-    <!-- Panel droit — Formulaire -->
-    <div class="panel-right">
-
-        <div class="form-header">
-            <h2>Bienvenue 👋</h2>
-            <p>Connectez-vous pour acceder a votre tableau de bord</p>
-        </div>
-
-        @if ($errors->any())
-        <div class="error-box">
-            <i class="fas fa-exclamation-circle"></i>
-            {{ $errors->first() }}
-        </div>
-        @endif
+    <div class="right-panel">
+        <h2 class="form-title">Connexion</h2>
+        <p class="form-subtitle">Accédez à votre tableau de supervision</p>
 
         @if (session('status'))
-        <div style="background:#D1FAE5; border:1px solid #6EE7B7; color:#065F46;
-                    padding:12px 16px; border-radius:10px; margin-bottom:20px;
-                    font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-check-circle"></i> {{ session('status') }}
-        </div>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> {{ session('status') }}
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
+            </div>
         @endif
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
-
             <div class="form-group">
-                <label class="form-label">Adresse email</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <input type="email" name="email" class="form-input"
-                           value="{{ old('email') }}"
-                           placeholder="admin@softseven.ma"
-                           required autofocus autocomplete="email">
+                <label class="form-label" for="email">Adresse email</label>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" name="email" class="form-input"
+                        value="{{ old('email') }}" placeholder="email@entreprise.com" required autofocus>
                 </div>
             </div>
-
             <div class="form-group">
-                <label class="form-label">Mot de passe</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" name="password" class="form-input"
-                           placeholder="••••••••••"
-                           required autocomplete="current-password"
-                           id="password-input">
-                    <i class="fas fa-eye" id="toggle-pwd"
-                       onclick="togglePwd()"
-                       style="position:absolute; right:14px; top:50%; transform:translateY(-50%);
-                              color:#94A3B8; cursor:pointer; font-size:14px;"></i>
+                <label class="form-label" for="password">Mot de passe</label>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" class="form-input"
+                        placeholder="Votre mot de passe" required>
                 </div>
             </div>
-
-            <div class="remember-row">
-                <label class="remember-label">
+            <div class="form-row">
+                <label class="checkbox-wrapper">
                     <input type="checkbox" name="remember">
-                    Se souvenir de moi
+                    Maintenir la connexion
                 </label>
-                @if (Route::has('password.request'))
-                <a href="{{ route('password.request') }}" class="forgot-link">
-                    Mot de passe oublié ?
-                </a>
-                @endif
+                <a href="{{ route('password.request') }}" class="forgot-link">Mot de passe oublié ?</a>
             </div>
-
-            <button type="submit" class="btn-login">
-                <i class="fas fa-sign-in-alt"></i>
-                Se connecter
-            </button>
+            <button type="submit" class="btn-submit">Se connecter</button>
         </form>
 
-        <hr class="divider">
-
-        <div class="accounts-hint">
-            <div class="hint-title">🔑 Comptes de demonstration</div>
-            <div class="account-row">
-                <span>admin@softseven.ma — SoftSeven@2026</span>
-                <span class="role">Super Admin</span>
-            </div>
-            <div class="account-row">
-                <span>agent@softseven.ma — Agent@2026</span>
-                <span class="role">Agent</span>
-            </div>
-        </div>
-
+        <div class="form-footer">MonitorPro © 2026 — Tous droits réservés</div>
     </div>
-</div>
 
-<script>
-function togglePwd() {
-    const input = document.getElementById('password-input');
-    const icon  = document.getElementById('toggle-pwd');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-</script>
+</div>
 
 </body>
 </html>

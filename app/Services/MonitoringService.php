@@ -108,33 +108,68 @@ class MonitoringService
         }
     }
 
-    private function sendAlert(Site $site, Incident $incident, string $type): void
-    {
-        $user = $site->user;
+    private function sendAlert(Site $site, Incident $incident, string $type, ?int $responseTime = null, ?int $httpCode = null): void
+{
+    $user = $site->user;
 
-        Alerte::create([
-            'incident_id' => $incident->id,
-            'sent_at'     => now(),
-            'type'        => $type,
-            'email_to'    => $user->email,
-        ]);
+    Alerte::create([
+        'incident_id' => $incident->id,
+        'sent_at'     => now(),
+        'type'        => $type,
+        'email_to'    => $user->email,
+    ]);
 
-        $subject = match($type) {
-            'down'     => "🔴 ALERTE : {$site->client_name} est HORS LIGNE",
-            'slow'     => "🟡 ALERTE : {$site->client_name} est LENT",
-            'resolved' => "🟢 RÉSOLU : {$site->client_name} est de nouveau EN LIGNE",
-        };
+    $recipients = [$user->email];
 
-        $message = match($type) {
-            'down'     => "Le site {$site->url} est hors ligne depuis " . now()->format('H:i:s'),
-            'slow'     => "Le site {$site->url} répond lentement.",
-            'resolved' => "Le site {$site->url} est de nouveau accessible.",
-        };
-
-        Mail::raw($message, function($mail) use ($user, $subject) {
-            $mail->to($user->email)->subject($subject);
-        });
+    if (!empty($site->notify_emails)) {
+        $recipients = array_merge(
+            $recipients,
+            array_filter(array_map('trim', explode(',', $site->notify_emails)))
+        );
     }
+
+    $mailable = match ($type) {
+
+        'down' => new \App\Mail\AlerteDownMail(
+            $site,
+            $incident,
+            $httpCode ?? 0
+        ),
+
+        'slow' => new \App\Mail\AlerteSlowMail(
+            $site,
+            $incident,
+            $responseTime ?? 0
+        ),
+
+        'resolved' => new \App\Mail\AlerteResolvedMail(
+            $site,
+            $incident
+        ),
+
+        // BONUS si tu veux les activer plus tard
+        'ssl' => new \App\Mail\AlerteSslMail(
+            $site,
+            $site->ssl_days_remaining ?? 0,
+            $site->ssl_expires_at ?? ''
+        ),
+
+        'domain' => new \App\Mail\AlerteDomainMail(
+            $site,
+            $site->domain_days_remaining ?? 0,
+            $site->domain_expires_at ?? ''
+        ),
+
+        default => null,
+    };
+
+    if (!$mailable) {
+        logger()->warning("Type email inconnu: {$type}");
+        return;
+    }
+
+    \Illuminate\Support\Facades\Mail::to($recipients)->send($mailable);
+}
 
     public function calculateHealthScore(Site $site): int
     {
