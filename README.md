@@ -1,14 +1,14 @@
 <div align="center">
 
 # MonitorPro
-### Système Intelligent de Monitoring des Sites Web avec Alertes Automatiques
+### Système Intelligent de Monitoring des Sites Web avec Alertes Automatiques et IA
 
 [![Laravel](https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
 [![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![License](https://img.shields.io/badge/License-Academic-blue?style=for-the-badge)](LICENSE)
 
-> **Projet de Fin d'Etudes — Licence Informatique IRM**
+> **Projet de Fin d'Etudes — Licence Informatique, Reseaux et Multimedia (IRM)**
 > Faculte des Sciences et Techniques de Mohammedia (FSTM)
 > Universite Hassan II de Casablanca — 2026
 
@@ -18,14 +18,20 @@
 
 ## Presentation
 
-**MonitorPro** est une application web developpee dans le cadre d'un stage de fin d'etudes chez **Soft Seven Art**, agence digitale basee a Casablanca. Elle permet de surveiller en temps reel la disponibilite, le temps de reponse et la validite SSL des sites web clients, avec envoi automatique d'alertes par email en cas d'incident.
+**MonitorPro** est une application web complete developpee dans le cadre d'un stage de fin
+d'etudes chez **Soft Seven Art**, agence digitale basee a Casablanca. Elle permet de surveiller
+en temps reel la disponibilite, les performances et la securite des sites web clients, avec
+envoi automatique d'alertes par email, generation de rapports PDF et assistant intelligent
+base sur l'IA.
 
 ### Objectifs
-- Surveiller automatiquement la disponibilite (uptime) des sites web
+- Surveiller automatiquement la disponibilite (uptime) des sites web toutes les 5 minutes
 - Mesurer les temps de reponse et detecter les ralentissements
-- Verifier la validite des certificats SSL
-- Envoyer des alertes email automatiques en cas d'incident
+- Verifier la validite et l'expiration des certificats SSL
+- Consulter les informations WHOIS et suivre l'expiration des domaines
+- Envoyer des alertes email automatiques via Brevo SMTP
 - Generer des rapports PDF hebdomadaires par client
+- Offrir un assistant conversationnel intelligent base sur Google Gemini
 
 ---
 
@@ -33,15 +39,18 @@
 
 | Fonctionnalite | Description |
 |---|---|
-| Dashboard temps reel | KPIs, graphiques Chart.js, donut uptime, auto-refresh 30s |
-| Surveillance HTTP/HTTPS | Verification automatique toutes les 5 minutes |
-| Verification SSL | Validite et date d'expiration des certificats |
-| Check Now | Verification instantanee a la demande |
-| Alertes automatiques | Email lors de panne, lenteur ou resolution |
-| Historique uptime | Barre de 30 dernieres verifications par site |
-| Gestion incidents | Timeline complete des incidents avec duree |
-| Rapports PDF | Generation et telechargement de rapports hebdomadaires |
-| Authentification | Login securise avec gestion de profil |
+| **Dashboard temps reel** | KPIs, graphiques Chart.js, histogramme 7 jours, auto-refresh 30s |
+| **Surveillance uptime** | Verification HTTP/HTTPS automatique toutes les 5 minutes |
+| **Verification SSL** | Validite et date d'expiration, alertes a 30/15/7 jours |
+| **Verification WHOIS** | Informations registrar, expiration de domaine, alertes preventives |
+| **Alertes automatiques** | Email lors de panne, lenteur, resolution, expiration SSL/domaine |
+| **Rapports PDF** | Generation et envoi automatique de rapports hebdomadaires |
+| **Gestion multi-roles** | 3 profils : Super Administrateur, Agent, Client |
+| **Gestion des clients** | Creation, modification, desactivation, reset mot de passe |
+| **Email de bienvenue** | Envoi automatique des identifiants au client a la creation |
+| **Assistant IA** | Chatbot conversationnel base sur Google Gemini via n8n |
+| **Supervision Cron** | Tableau de bord des 5 taches planifiees avec historique |
+| **Securite renforcee** | 3 middlewares, blocage comptes desactives, isolation des donnees |
 
 ---
 
@@ -56,31 +65,107 @@
 | Guzzle HTTP | 7.x | Client HTTP pour le monitoring |
 | DomPDF | 3.1 | Generation de rapports PDF |
 | Laravel Breeze | 1.x | Authentification |
-| Laravel Scheduler | — | Automatisation des verifications |
+| Laravel Scheduler | — | Automatisation des taches planifiees |
+| Laravel Queues | — | Traitement asynchrone des jobs |
 
 ### Frontend
 | Technologie | Version | Role |
 |---|---|---|
 | Blade | — | Moteur de templates Laravel |
-| Tailwind CSS | 3.x | Framework CSS |
+| CSS personnalise | — | Palette beige cream + bleu ciel professionnel |
 | Chart.js | Latest | Graphiques et visualisations |
 | Font Awesome | 6.5 | Icones |
 
-### Services
+### Services externes
 | Service | Role |
 |---|---|
-| Mailtrap | Sandbox SMTP pour les tests |
-| Gmail / Mailgun | SMTP production |
-| Laragon | Environnement de developpement local |
+| Brevo SMTP | Envoi des emails d'alerte et de bienvenue (port 587 TLS) |
+| n8n Cloud | Orchestration du workflow IA |
+| Google Gemini | Modele de langage pour l'assistant conversationnel |
+| ngrok | Exposition de l'API locale pour n8n |
+| Laragon | Environnement de developpement local (Apache + MySQL + PHP) |
+
+---
+
+## Architecture du monitoring
+Scheduler Laravel (php artisan schedule:work)
+├── monitor:check-uptime  (toutes les 5 min)
+│       └── CheckUptimeJob → HTTP GET → is_up + response_time
+│               ├── INSERT verifications
+│               └── Si anomalie → INSERT incidents → Alerte email
+│
+├── monitor:check-ssl     (toutes les heures)
+│       └── CheckSslJob → Handshake TLS → ssl_valid + ssl_expires_at
+│               └── Si expiration < 30j → Alerte email
+│
+├── monitor:check-whois   (chaque semaine)
+│       └── CheckWhoisJob → Serveur WHOIS → registrar + expiry_date
+│               └── Si expiration < 30j → Alerte email
+│
+├── monitor:send-weekly-report  (lundi 08h00)
+│       └── SendWeeklyReportJob → DomPDF → Email PDF
+│
+└── monitor:cleanup       (chaque jour 00h00)
+└── Nettoyage des anciennes donnees
+Queue Worker (php artisan queue:work --tries=3)
+└── Consomme les jobs depuis la table "jobs"
+└── En cas d'echec → table "failed_jobs" (apres 3 tentatives)
+
+### Architecture du Chatbot IA
+Navigateur (JS fetch)
+└── POST /chatbot/send  [route Laravel — proxy anti-CORS]
+└── HTTP::post() → n8n Cloud webhook
+└── Workflow n8n → Google Gemini API
+└── Reponse formatee (Markdown, tableaux)
+└── Retour au navigateur → Affichage
+
+---
+
+## Gestion des roles (RBAC)
+
+| Permission | Super Admin | Agent | Client |
+|---|---|---|---|
+| Voir tous les sites | ✅ | ✅ | ❌ |
+| Voir ses propres sites | ✅ | ✅ | ✅ |
+| Ajouter / Modifier / Supprimer des sites | ✅ | ✅ | ❌ |
+| Gestion des agents | ✅ | ❌ | ❌ |
+| Gestion des clients | ✅ | ❌ | ❌ |
+| Supervision Cron Jobs | ✅ | ❌ | ❌ |
+| Assistant IA | ✅ | ✅ | ✅ |
+| Rapports et alertes | ✅ | ✅ | Les siens |
+
+---
+
+## Structure de la base de donnees
+
+monitoring_db  (13 tables)
+│
+├── Tables metier
+│   ├── users              → Utilisateurs (super_admin, agent, client)
+│   ├── sites              → Sites web surveilles, rattaches a un client
+│   ├── verifications      → Resultats de chaque verification (uptime + SSL)
+│   ├── whois_info         → Informations WHOIS et expiration des domaines
+│   ├── incidents          → Pannes et lenteurs detectees
+│   ├── alertes            → Emails d'alerte envoyes
+│   ├── rapports           → Rapports PDF generes
+│   └── cron_logs          → Historique d'execution des taches planifiees
+│
+└── Tables systeme Laravel
+├── jobs                      → File d'attente des jobs asynchrones
+├── failed_jobs               → Jobs en echec
+├── migrations                → Historique des migrations
+├── password_reset_tokens     → Tokens de reinitialisation
+└── personal_access_tokens    → Tokens d'acces API
 
 ---
 
 ## Installation
 
 ### Prerequis
-- [Laragon](https://laragon.org) (Apache + MySQL + PHP 8.x)
+- [Laragon](https://laragon.org) (Apache + MySQL + PHP 8.3)
 - [Composer](https://getcomposer.org) 2.x
 - [Node.js](https://nodejs.org) 18+ et npm
+- [ngrok](https://ngrok.com) (optionnel, pour exposer l'API a n8n)
 
 ### Etapes d'installation
 
@@ -100,140 +185,131 @@ cp .env.example .env
 php artisan key:generate
 
 # 5. Configurer la base de donnees dans .env
-# DB_DATABASE=monitoring_db
-# DB_USERNAME=root
-# DB_PASSWORD=
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=monitoring_db
+DB_USERNAME=root
+DB_PASSWORD=
 
 # 6. Creer la base de donnees "monitoring_db" dans MySQL
 # Puis executer les migrations
 php artisan migrate
 
-# 7. Creer le compte administrateur
-php artisan db:seed --class=UserSeeder
+# 7. Creer le lien symbolique pour le stockage
+php artisan storage:link
 ```
 
-### Configuration Email
+### Configuration Email (Brevo SMTP)
 
-**Mode developpement (Mailtrap) :**
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=votre_username_mailtrap
-MAIL_PASSWORD=votre_password_mailtrap
+MAIL_HOST=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME=votre_username_brevo
+MAIL_PASSWORD=votre_cle_api_brevo
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS="monitoring@softseven.ma"
-MAIL_FROM_NAME="Monitoring System"
+MAIL_FROM_NAME="MonitorPro"
 ```
 
-**Mode production (Gmail) :**
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=votre@gmail.com
-MAIL_PASSWORD=votre_app_password_google
-MAIL_ENCRYPTION=tls
-```
+> Brevo (ex-Sendinblue) est utilise pour l'envoi de tous les emails :
+> alertes, rapports hebdomadaires et emails de bienvenue clients.
 
 ---
 
 ## Lancement
 
-Ouvrir **deux terminaux** dans le dossier du projet :
+Ouvrir **trois terminaux** dans le dossier du projet :
 
 ```bash
-# Terminal 1 — Serveur de developpement
-php artisan serve
-# Application disponible sur http://127.0.0.1:8000
+# 1. Laragon : demarrer Apache + MySQL depuis l'interface graphique
 
-# Terminal 2 — Scheduler automatique (monitoring toutes les minutes)
+# Terminal 1 — Scheduler (taches automatiques de monitoring)
+cd C:\laragon\www\monitoring-app
 php artisan schedule:work
+
+# Terminal 2 — Queue Worker (execution asynchrone des jobs)
+php artisan queue:work --tries=3
+
+# Terminal 3 — Optionnel : exposition via ngrok (pour n8n)
+ngrok http --host-header=rewrite monitoring-app.test:80
 ```
 
-> Le Terminal 2 doit rester ouvert en permanence pour que le monitoring automatique fonctionne.
+> **Important** : les terminaux 1 et 2 doivent rester ouverts en permanence
+> pour que le monitoring automatique et les alertes fonctionnent.
+
+**Acceder a l'application** : http://monitoring-app.test
 
 ---
 
-## Acces
+## Comptes de demonstration
 
-Les credentials sont configures dans `database/seeders/UserSeeder.php`.
+| Role | Email | Mot de passe |
+|---|---|---|
+| Super Administrateur | admin@softseven.ma | *(voir UserSeeder)* |
+| Agent | agent@softseven.ma | *(voir UserSeeder)* |
+| Client (exemple) | client@test.ma | *(defini a la creation)* |
 
-```bash
-# Pour creer ou reinitialiser le compte admin :
-php artisan db:seed --class=UserSeeder
-```
-
-> Pour des raisons de securite, les credentials ne sont pas affiches dans ce README.
-> Consulter le fichier `UserSeeder.php` pour les modifier avant le deploiement.
-
----
-
-## Structure de la base de donnees
-
-```
-monitoring_db
-├── users              → Administrateurs du systeme
-├── sites              → Sites web a surveiller
-├── verifications      → Resultats de chaque verification
-├── incidents          → Pannes et lenteurs detectees
-├── alertes            → Emails d'alertes envoyes
-├── rapports           → Rapports PDF generes
-└── ...                → Tables systeme Laravel
-```
+> Les clients sont crees directement depuis l'interface "Gestion Clients"
+> ou lors de l'ajout d'un site ("Nouveau client" dans le formulaire).
 
 ---
 
 ## Structure du projet
 
-```
 monitoring-app/
 ├── app/
-│   ├── Http/Controllers/    → DashboardController, SiteController, RapportController...
-│   ├── Models/              → User, Site, Verification, Incident, Alerte, Rapport
-│   ├── Services/            → MonitoringService (logique de verification)
-│   ├── Jobs/                → CheckSiteJob (tache asynchrone)
-│   └── Console/             → Kernel.php (configuration du scheduler)
-├── resources/views/         → Vues Blade (dashboard, sites, rapports, incidents)
+│   ├── Http/
+│   │   ├── Controllers/         → Dashboard, Site, Incident, Alerte, Rapport, Agent...
+│   │   ├── Middleware/          → CheckActiveUser.php, ClientMiddleware.php
+│   │   └── Kernel.php           → Enregistrement des middlewares
+│   ├── Jobs/                    → CheckUptimeJob, CheckSslJob, CheckWhoisJob,
+│   │                              SendWeeklyReportJob
+│   ├── Mail/                    → AlerteDownMail, AlerteSlowMail, AlerteSslMail,
+│   │                              AlerteDomainMail, AlerteResolvedMail,
+│   │                              RapportHebdoMail, ClientWelcomeMail
+│   ├── Models/                  → User, Site, Verification, Incident, Alerte,
+│   │                              Rapport, CronLog, WhoisInfo
+│   └── Services/                → MonitoringService.php
+├── resources/
+│   └── views/
+│       ├── layouts/             → monitoring.blade.php (layout principal)
+│       ├── auth/                → login, forgot-password, reset-password
+│       ├── admin/               → cron_jobs, agents, clients
+│       ├── sites/               → index, show, create, edit
+│       ├── alertes/             → index
+│       ├── incidents/           → index
+│       ├── rapports/            → index, pdf
+│       ├── chatbot/             → index
+│       ├── profile/             → edit
+│       └── emails/              → alerte-down, alerte-slow, alerte-ssl,
+│                                   alerte-domain, alerte-resolved,
+│                                   rapport-hebdo, client-welcome
 ├── database/
-│   ├── migrations/          → 9 migrations pour toutes les tables
-│   └── seeders/             → UserSeeder, DemoSeeder
-└── routes/web.php           → Definition de toutes les routes
-```
+│   └── migrations/              → 13 tables MySQL
+└── routes/web.php               → Routes de l'application + proxy chatbot
 
 ---
 
-## Architecture du monitoring
-
-```
-Scheduler (chaque minute)
-    └── CheckSiteJob (par site actif)
-            └── MonitoringService::checkSite()
-                    ├── Guzzle HTTP → GET request → http_code + response_time
-                    ├── OpenSSL    → Verification SSL + date expiration
-                    ├── MySQL      → INSERT verifications
-                    └── Si incident detecte
-                            ├── MySQL        → INSERT incidents
-                            └── AlerteService → Mail::raw() → SMTP
-```
-
----
-
-## Commandes utiles
+## Commandes Artisan utiles
 
 ```bash
-# Verifier tous les sites manuellement
-php artisan tinker
->>> App\Models\Site::all()->each(fn($s) => (new App\Services\MonitoringService())->checkSite($s));
+# Lancer manuellement une tache de monitoring
+php artisan monitor:check-uptime
+php artisan monitor:check-ssl
+php artisan monitor:check-whois
+php artisan monitor:send-weekly-report
+php artisan monitor:cleanup
+
+# Vider les caches
+php artisan config:clear && php artisan cache:clear && php artisan view:clear
 
 # Lister toutes les routes
 php artisan route:list
 
-# Vider les caches
-php artisan config:clear && php artisan cache:clear
-
-# Reinitialiser la base de donnees
-php artisan migrate:fresh --seed
+# Acceder a Tinker
+php artisan tinker
 ```
 
 ---
@@ -243,34 +319,24 @@ php artisan migrate:fresh --seed
 <div align="center">
 
 **ABDRAMAN IBNI ABDRAMAN**
-
-Etudiant en Licence Informatique — Specialite IRM
-
-Faculte des Sciences et Techniques de Mohammedia (FSTM)
-
+Etudiant en Licence IRM — FSTM
 ibniabdraman62@gmail.com
-
-Role : Developpement Frontend et Integration systeme
+Role : Developpement full-stack, integration IA, securite
 
 ---
 
 **ACHRAF MABROUK**
-
-Etudiant en Licence Informatique — Specialite IRM
-
-Faculte des Sciences et Techniques de Mohammedia (FSTM)
-
+Etudiant en Licence IRM — FSTM
 mabroukachraf.fstm@gmail.com
-
-Role : Developpement Backend et Base de donnees
+Role : Developpement backend, base de donnees, jobs asynchrones
 
 ---
 
 Stage effectue chez **Soft Seven Art** — Casablanca, Maroc
 
-**Encadrant academique :** Pr. Noureddine MOUMKINE — FSTM
+**Encadrant entreprise :** M. Jail OTHMANE — Soft Seven Art
 
-noureddine.moumkine@fstm.ac.ma
+**Encadrant academique :** Pr. Noureddine MOUMKINE — FSTM
 
 Universite Hassan II de Casablanca
 
