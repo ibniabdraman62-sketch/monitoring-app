@@ -135,7 +135,7 @@
                             <span style="color:var(--success); font-weight:700;">0</span>
                         @endif
                     </td>
-                    <td class="text-xs text-muted font-mono">{{ $log->executed_at->format('d/m/Y H:i:s') }}</td>
+                    <td class="text-xs text-muted font-mono">{{ $log->executed_at->timezone('Africa/Casablanca')->format('d/m/Y H:i:s') }}</td>
                 </tr>
             @empty
                 <tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">

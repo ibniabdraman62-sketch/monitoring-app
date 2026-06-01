@@ -1,69 +1,98 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Alerte SSL</title></head>
-<body style="margin:0; padding:0; font-family: 'Segoe UI', Arial, sans-serif; background:#F8FAFC; color:#0F172A;">
-
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC; padding:30px 0;">
+<head><meta charset="UTF-8"><title>Alerte SSL — MonitorPro</title></head>
+<body style="margin:0;padding:0;background:#FBF8F0;font-family:Arial,sans-serif;color:#3D2F1F;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8F0;padding:40px 0;">
 <tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0"
+       style="background:#FFFFFF;border:1px solid #E8DFC9;border-radius:12px;overflow:hidden;
+              box-shadow:0 4px 12px rgba(61,47,31,0.08);">
 
-<table width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(15,23,42,0.08);">
+    {{-- HEADER --}}
+    <tr>
+        <td style="background:linear-gradient(135deg,#C48A4A 0%,#D4A060 100%);
+                   padding:28px 40px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#FFFFFF;margin-bottom:4px;">
+                MonitorPro — Alerte Certificat SSL
+            </div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.85);">
+                Action requise · {{ now()->format('d/m/Y à H:i') }}
+            </div>
+        </td>
+    </tr>
 
-    <tr><td style="background:#B45309; padding:24px 32px; color:#FFFFFF;">
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; opacity:0.85;">MonitorPro — Alerte de sécurité</div>
-        <div style="font-size:22px; font-weight:700; padding-top:8px;">Certificat SSL bientôt expiré</div>
-    </td></tr>
+    {{-- BODY --}}
+    <tr>
+        <td style="padding:32px 40px;">
+            <p style="font-size:15px;color:#3D2F1F;margin:0 0 14px;">Bonjour,</p>
 
-    <tr><td style="padding:32px;">
-        <p style="font-size:14.5px; line-height:1.7; margin:0 0 18px;">Bonjour,</p>
-
-        <p style="font-size:14.5px; line-height:1.7; margin:0 0 18px;">
-            Le certificat SSL/TLS du site <strong>{{ $site->client_name }}</strong>
-            expirera dans <strong style="color:#B45309;">{{ $daysRemaining }} jours</strong>.
-            Une action est nécessaire pour éviter une interruption de service.
-        </p>
-
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#FEF3C7; border-left:4px solid #B45309; padding:18px 20px; border-radius:6px; margin:20px 0;">
-            <tr><td><table width="100%">
-                <tr><td style="padding:6px 0; color:#92400E; font-size:12px; width:40%;">Site concerné</td>
-                    <td style="padding:6px 0; color:#0F172A; font-weight:600; font-size:13px;">{{ $site->client_name }}</td></tr>
-                <tr><td style="padding:6px 0; color:#92400E; font-size:12px;">URL</td>
-                    <td style="padding:6px 0; color:#0F172A; font-weight:600; font-size:13px;">{{ $site->url }}</td></tr>
-                <tr><td style="padding:6px 0; color:#92400E; font-size:12px;">Jours avant expiration</td>
-                    <td style="padding:6px 0; color:#B45309; font-weight:700; font-size:15px;">{{ $daysRemaining }} jours</td></tr>
-                <tr><td style="padding:6px 0; color:#92400E; font-size:12px;">Date d'expiration</td>
-                    <td style="padding:6px 0; color:#0F172A; font-weight:600; font-size:13px;">{{ $expiresAt }}</td></tr>
-                <tr><td style="padding:6px 0; color:#92400E; font-size:12px;">Statut actuel</td>
-                    <td style="padding:6px 0; color:#0F172A; font-weight:600; font-size:13px;">Valide — renouvellement requis</td></tr>
-            </table></td></tr>
-        </table>
-
-        <div style="margin:24px 0;">
-            <div style="font-size:13px; font-weight:700; color:#0F172A; margin-bottom:8px;">Conséquences d'une expiration</div>
-            <p style="font-size:13.5px; line-height:1.7; margin:0; color:#475569;">
-                Les navigateurs afficheront un avertissement de sécurité aux visiteurs, ce qui peut entraîner une perte de trafic
-                immédiate et nuire à la crédibilité du site. Les transactions chiffrées seront également impactées.
+            <p style="font-size:14px;line-height:1.7;color:#5C4B36;margin:0 0 20px;">
+                Le certificat SSL du site <strong>{{ $site->client_name }}</strong>
+                arrive à expiration. Une action rapide est nécessaire pour éviter
+                toute interruption de service ou alerte de sécurité pour les visiteurs.
             </p>
-        </div>
 
-        <div style="margin:24px 0; padding:18px 20px; background:#F8FAFC; border-radius:6px;">
-            <div style="font-size:13px; font-weight:700; color:#0F172A; margin-bottom:10px;">Actions recommandées</div>
-            <ol style="margin:0; padding-left:20px; font-size:13px; line-height:1.8; color:#334155;">
-                <li>Contacter le registrar ou l'autorité de certification</li>
-                <li>Planifier le renouvellement du certificat sans délai</li>
-                <li>Vérifier la configuration du serveur après renouvellement</li>
-                <li>Tester la chaîne de certificats avec un outil de validation</li>
-            </ol>
-        </div>
-    </td></tr>
+            {{-- Info box --}}
+            <table width="100%" cellpadding="0" cellspacing="0"
+                   style="background:#F5E9D6;border:1px solid #E8D0A0;
+                          border-radius:10px;margin:0 0 20px;">
+                <tr><td style="padding:20px 24px;">
+                    <div style="font-size:11px;color:#8B6530;text-transform:uppercase;
+                                letter-spacing:1px;font-weight:700;margin-bottom:12px;">
+                        Détails du certificat SSL
+                    </div>
+                    <table width="100%">
+                        <tr>
+                            <td style="padding:5px 0;color:#8B7855;font-size:13px;width:50%;">Site surveillé</td>
+                            <td style="padding:5px 0;font-weight:700;font-size:13px;color:#3D2F1F;">{{ $site->client_name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px 0;color:#8B7855;font-size:13px;">URL</td>
+                            <td style="padding:5px 0;font-size:13px;">
+                                <a href="{{ $site->url }}" style="color:#5B95C4;text-decoration:none;">{{ $site->url }}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px 0;color:#8B7855;font-size:13px;">Jours restants</td>
+                            <td style="padding:5px 0;font-weight:700;font-size:13px;
+                                       color:{{ isset($daysRemaining) && $daysRemaining <= 7 ? '#B66258' : '#C48A4A' }};">
+                                {{ $daysRemaining ?? 'N/D' }} jours
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px 0;color:#8B7855;font-size:13px;">Date d'expiration</td>
+                            <td style="padding:5px 0;font-weight:700;font-size:13px;color:#B66258;">
+                                {{ isset($expiresAt) ? \Carbon\Carbon::parse($expiresAt)->format('d/m/Y') : 'N/D' }}
+                            </td>
+                        </tr>
+                    </table>
+                </td></tr>
+            </table>
 
-    <tr><td style="padding:18px 32px; background:#F8FAFC; border-top:1px solid #E2E8F0;">
-        <div style="font-size:11px; color:#94A3B8; line-height:1.6;">
-            <strong>MonitorPro</strong> — Système de monitoring intelligent<br>
-            Soft Seven Art — Casablanca, Maroc<br>
-            Cet email est généré automatiquement, merci de ne pas y répondre.
-        </div>
-    </td></tr>
+            <p style="font-size:13px;line-height:1.6;color:#5C4B36;margin:0 0 16px;">
+                Veuillez renouveler le certificat SSL auprès de votre registrar ou
+                de votre hébergeur dès que possible pour maintenir la sécurité
+                et la confiance des utilisateurs de ce site.
+            </p>
+
+            <p style="font-size:13px;color:#3D2F1F;margin:18px 0 0;">
+                Cordialement,<br>
+                <strong>L'équipe Soft Seven Art</strong><br>
+                <span style="font-size:12px;color:#8B7855;">Plateforme MonitorPro — Surveillance intelligente</span>
+            </p>
+        </td>
+    </tr>
+
+    {{-- FOOTER --}}
+    <tr>
+        <td style="background:#FBF8F0;padding:16px 40px;border-top:1px solid #E8DFC9;text-align:center;">
+            <p style="font-size:11px;color:#8B7855;margin:0;">
+                MonitorPro © {{ date('Y') }} — Soft Seven Art · Casablanca, Maroc
+            </p>
+        </td>
+    </tr>
 </table>
-
-</td></tr></table>
-</body></html>
+</td></tr>
+</table>
+</body>
+</html>

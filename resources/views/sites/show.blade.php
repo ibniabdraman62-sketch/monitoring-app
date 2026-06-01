@@ -119,7 +119,7 @@
                         {{ $lastVerif->ssl_days_remaining }} j
                     </div>
                     <div class="text-xs text-muted">
-                        Expire le {{ \Carbon\Carbon::parse($lastVerif->ssl_expires_at)->format('d/m/Y') }}
+                        Expire le {{ \Carbon\Carbon::parse($lastVerif->ssl_expires_at)->timezone('Africa/Casablanca')->format('d/m/Y') }}
                     </div>
                 @else
                     <div class="text-muted">N/D</div>
@@ -138,7 +138,7 @@
                         {{ $dd }} j
                     </div>
                     <div class="text-xs text-muted">
-                        Expire le {{ \Carbon\Carbon::parse($site->domain_expires_at)->format('d/m/Y') }}
+                        Expire le {{ \Carbon\Carbon::parse($site->domain_expires_at)->timezone('Africa/Casablanca')->format('d/m/Y') }}
                     </div>
                 @else
                     <div class="text-muted">N/D</div>
@@ -178,7 +178,7 @@
             <tbody>
             @forelse($site->verifications()->orderByDesc('checked_at')->limit(100)->get() as $v)
                 <tr>
-                    <td class="text-sm font-mono">{{ $v->checked_at->format('d/m/Y H:i:s') }}</td>
+                    <td class="text-sm font-mono">{{ $v->checked_at->timezone('Africa/Casablanca')->format('d/m/Y H:i:s') }}</td>
                     <td>
                         @if($v->is_up)<span class="badge badge-success">OK</span>
                         @else<span class="badge badge-danger">Échec</span>@endif

@@ -85,12 +85,12 @@
             <tbody>
             @forelse($rapports ?? [] as $r)
                 <tr>
-                    <td class="text-sm font-mono">{{ $r->generated_at->format('d/m/Y H:i') }}</td>
+                    <td class="text-sm font-mono">{{ $r->generated_at->timezone('Africa/Casablanca')->format('d/m/Y H:i') }}</td>
                     <td style="font-weight:600;">{{ $r->site->client_name ?? '—' }}</td>
                     <td class="text-sm">
-                        {{ $r->period_start ? \Carbon\Carbon::parse($r->period_start)->format('d/m/Y') : '—' }}
+                        {{ $r->period_start ? \Carbon\Carbon::parse($r->period_start)->timezone('Africa/Casablanca')->format('d/m/Y') : '—' }}
                         →
-                        {{ $r->period_end ? \Carbon\Carbon::parse($r->period_end)->format('d/m/Y') : '—' }}
+                        {{ $r->period_end ? \Carbon\Carbon::parse($r->period_end)->timezone('Africa/Casablanca')->format('d/m/Y') : '—' }}
                     </td>
                     <td>
                         @php $pct = $r->uptime_pct ?? 0; @endphp

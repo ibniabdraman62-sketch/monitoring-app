@@ -15,19 +15,17 @@ class AlerteDomainMail extends Mailable
 
     public Site $site;
     public int $daysRemaining;
-    public string $expiresAt;
 
-    public function __construct(Site $site, int $daysRemaining, string $expiresAt)
+    public function __construct(Site $site, int $daysRemaining)
     {
         $this->site          = $site;
         $this->daysRemaining = $daysRemaining;
-        $this->expiresAt     = $expiresAt;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "MonitorPro Domaine bientôt expiré — {$this->site->client_name}",
+            subject: " MonitorPro — Domaine expire dans {$this->daysRemaining} jours : {$this->site->client_name}",
         );
     }
 
@@ -35,11 +33,6 @@ class AlerteDomainMail extends Mailable
     {
         return new Content(
             view: 'emails.alerte-domain',
-            with: [
-                'site'          => $this->site,
-                'daysRemaining' => $this->daysRemaining,
-                'expiresAt'     => $this->expiresAt,
-            ],
         );
     }
 }

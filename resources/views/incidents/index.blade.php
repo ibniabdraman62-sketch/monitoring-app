@@ -107,10 +107,10 @@
                             <span class="badge badge-info">{{ ucfirst($inc->type) }}</span>
                         @endif
                     </td>
-                    <td class="text-sm font-mono">{{ $inc->started_at->format('d/m/Y H:i') }}</td>
+                    <td class="text-sm font-mono">{{ $inc->started_at ? $inc->started_at->timezone('Africa/Casablanca')->format('d/m/Y H:i') : '—' }}</td>
                     <td class="text-sm font-mono">
                         @if($inc->resolved_at)
-                            {{ \Carbon\Carbon::parse($inc->resolved_at)->format('d/m/Y H:i') }}
+                            {{ $inc->resolved_at ? $inc->resolved_at->timezone('Africa/Casablanca')->format('d/m/Y H:i') : '—' }}
                         @else
                             <span class="text-muted">—</span>
                         @endif
@@ -123,11 +123,11 @@
                         @endif
                     </td>
                     <td>
-                        @if($inc->is_resolved)
-                            <span class="badge badge-success badge-dot">Résolu</span>
-                        @else
-                            <span class="badge badge-danger badge-dot">Actif</span>
-                        @endif
+                        @if($inc->resolved_at !== null)
+    <span class="badge badge-success badge-dot">Résolu</span>
+@else
+    <span class="badge badge-danger badge-dot">Actif</span>
+@endif
                     </td>
                 </tr>
             @empty

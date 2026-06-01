@@ -15,9 +15,9 @@ class AlerteSslMail extends Mailable
 
     public Site $site;
     public int $daysRemaining;
-    public string $expiresAt;
+    public ?string $expiresAt;
 
-    public function __construct(Site $site, int $daysRemaining, string $expiresAt)
+    public function __construct(Site $site, int $daysRemaining, ?string $expiresAt = null)
     {
         $this->site          = $site;
         $this->daysRemaining = $daysRemaining;
@@ -27,7 +27,7 @@ class AlerteSslMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "MonitorPro Certificat SSL bientôt expiré — {$this->site->client_name}",
+            subject: " MonitorPro — Certificat SSL expire dans {$this->daysRemaining} jours : {$this->site->client_name}",
         );
     }
 
@@ -35,11 +35,6 @@ class AlerteSslMail extends Mailable
     {
         return new Content(
             view: 'emails.alerte-ssl',
-            with: [
-                'site'          => $this->site,
-                'daysRemaining' => $this->daysRemaining,
-                'expiresAt'     => $this->expiresAt,
-            ],
         );
     }
 }

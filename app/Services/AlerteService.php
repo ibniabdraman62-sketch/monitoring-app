@@ -12,30 +12,22 @@ class AlerteService
     {
         $site = $incident->site;
         $emails = $site->notify_emails
-            ? explode(',', $site->notify_emails)
+            ? array_filter(array_map('trim', explode(',', $site->notify_emails)))
             : [config('mail.from.address')];
 
-        $subjects = [
-            'down'     => "🔴 PANNE — {$site->client_name} est hors ligne",
-            'slow'     => "🟡 LENTEUR — {$site->client_name} répond lentement",
-            'resolved' => "🟢 RÉSOLU — {$site->client_name} est de nouveau en ligne",
-            'ssl'      => "⚠️ SSL — Certificat expire bientôt — {$site->client_name}",
-        ];
+        $mailable = match ($type) {
+            'down'     => new \App\Mail\AlerteDownMail($site, $incident, 0),
+            'slow'     => new \App\Mail\AlerteSlowMail($site, $incident, 0),
+            'resolved' => new \App\Mail\AlerteResolvedMail($site, $incident),
+            'ssl'      => new \App\Mail\AlerteSslMail($site, 0, ''),
+            default    => null,
+        };
 
-        $messages = [
-            'down' => "🔴 ALERTE PANNE\n\nLe site {$site->client_name} ({$site->url}) est HORS LIGNE.\n\nDétecté le : " . now()->format('d/m/Y à H:i:s') . "\n\n— MonitorPro | Soft Seven Art",
-            'slow' => "🟡 ALERTE LENTEUR\n\nLe site {$site->client_name} ({$site->url}) répond lentement.\n\nDétecté le : " . now()->format('d/m/Y à H:i:s') . "\n\n— MonitorPro | Soft Seven Art",
-            'resolved' => "🟢 RÉSOLUTION\n\nLe site {$site->client_name} ({$site->url}) est de nouveau EN LIGNE.\n\nRésolu le : " . now()->format('d/m/Y à H:i:s') . "\n\n— MonitorPro | Soft Seven Art",
-            'ssl' => "⚠️ ALERTE SSL\n\nLe certificat SSL du site {$site->client_name} ({$site->url}) expire bientôt.\n\n— MonitorPro | Soft Seven Art",
-        ];
+        if (!$mailable) return;
 
         foreach ($emails as $email) {
             try {
-                Mail::raw(
-                    $messages[$type] ?? "Alerte MonitorPro — {$site->client_name}",
-                    fn($m) => $m->to(trim($email))
-                                 ->subject($subjects[$type] ?? "Alerte — {$site->client_name}")
-                );
+                Mail::to(trim($email))->send($mailable);
 
                 Alerte::create([
                     'incident_id' => $incident->id,
@@ -52,22 +44,35 @@ class AlerteService
     public function sendDomainAlert(Site $site, int $daysLeft): void
     {
         $emails = $site->notify_emails
-            ? explode(',', $site->notify_emails)
+            ? array_filter(array_map('trim', explode(',', $site->notify_emails)))
+            : [config('mail.from.address')];
+
+        $expiresAt = $site->domain_expires_at ?? '';
+
+        foreach ($emails as $email) {
+            try {
+                Mail::to(trim($email))->send(
+                    new \App\Mail\AlerteDomainMail($site, $daysLeft, $expiresAt)
+                );
+            } catch (\Exception $e) {
+                \Log::error("Erreur alerte domaine : " . $e->getMessage());
+            }
+        }
+    }
+
+    public function sendSslAlert(Site $site, int $daysLeft, string $expiresAt): void
+    {
+        $emails = $site->notify_emails
+            ? array_filter(array_map('trim', explode(',', $site->notify_emails)))
             : [config('mail.from.address')];
 
         foreach ($emails as $email) {
             try {
-                Mail::raw(
-                    "⚠️ ALERTE DOMAINE — {$site->client_name}\n\n" .
-                    "Le nom de domaine du site {$site->url} expire dans {$daysLeft} jours.\n" .
-                    "Registrar : {$site->domain_registrar}\n" .
-                    "Date expiration : {$site->domain_expires_at}\n\n" .
-                    "— MonitorPro | Soft Seven Art",
-                    fn($m) => $m->to(trim($email))
-                                 ->subject("⚠️ Domaine expire bientôt — {$site->client_name}")
+                Mail::to(trim($email))->send(
+                    new \App\Mail\AlerteSslMail($site, $daysLeft, $expiresAt)
                 );
             } catch (\Exception $e) {
-                \Log::error("Erreur alerte domaine : " . $e->getMessage());
+                \Log::error("Erreur alerte SSL : " . $e->getMessage());
             }
         }
     }

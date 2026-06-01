@@ -419,14 +419,14 @@ Comment puis-je vous aider ?</div>
             if (!res.ok) throw new Error('HTTP ' + res.status);
 
             const data = await res.json();
-            const response = data.response || data.output || data.text
-                          || 'Désolé, je n\'ai pas pu traiter votre demande.';
+            const response = data.reply || data.response || data.output || data.text
+              || 'Désolé, je n\'ai pas pu traiter votre demande.';
 
             addMessage(response, false);
         } catch (err) {
             loadingMsg.remove();
             addMessage(
-                'Désolé, une erreur est survenue. Vérifiez que le workflow n8n est actif. <br><small>Détails : ' + err.message + '</small>',
+                'Désolé, une erreur est survenue.Le service IA est temporairement indisponible. <br><small>Détails : ' + err.message + '</small>',
                 false
             );
         }

@@ -20,7 +20,7 @@
 
             {{-- ═══ CLIENT PROPRIÉTAIRE ═══ --}}
             <div class="form-group">
-                <label class="form-label">Client propriétaire (qui verra ce site) *</label>
+                <label class="form-label">Client propriétaire (qui verra ce site) </label>
                 <div style="display:flex; gap:8px;">
                     <select name="user_id" id="userSelect" class="form-select" required style="flex:1;">
                         <option value="{{ auth()->id() }}">Soft Seven Art (interne)</option>
@@ -41,7 +41,7 @@
             {{-- ═══ NOM CLIENT + EMAIL ═══ --}}
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                 <div class="form-group">
-                    <label class="form-label">Nom du site (label affiché) *</label>
+                    <label class="form-label">Nom du site (label affiché) </label>
                     <input type="text" name="client_name" class="form-input"
                         value="{{ old('client_name') }}"
                         placeholder="Ex. Site officiel XYZ" required>
@@ -58,7 +58,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">URL du site à surveiller *</label>
+                <label class="form-label">URL du site à surveiller </label>
                 <input type="url" name="url" class="form-input"
                     value="{{ old('url') }}"
                     placeholder="https://www.exemple.com" required>
@@ -67,7 +67,7 @@
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                 <div class="form-group">
-                    <label class="form-label">Fréquence de vérification *</label>
+                    <label class="form-label">Fréquence de vérification </label>
                     <select name="frequency_min" class="form-select" required>
                         <option value="5"  {{ old('frequency_min', '5')==='5' ? 'selected' : '' }}>5 minutes</option>
                         <option value="10" {{ old('frequency_min')==='10' ? 'selected' : '' }}>10 minutes</option>
@@ -77,7 +77,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Seuil de lenteur (ms) *</label>
+                    <label class="form-label">Seuil de lenteur (ms) </label>
                     <input type="number" name="response_threshold_ms" class="form-input"
                         value="{{ old('response_threshold_ms', 2000) }}"
                         min="500" max="30000" required>
@@ -156,7 +156,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Mot de passe *</label>
+                <label class="form-label">Mot de passe </label>
                 <div style="display:flex; gap:8px;">
                     <input type="text" id="newClientPassword" class="form-input" style="flex:1;"
                            placeholder="Min. 8 caractères" required>

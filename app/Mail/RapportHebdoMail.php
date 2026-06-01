@@ -5,7 +5,6 @@ namespace App\Mail;
 use App\Models\Site;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -18,7 +17,7 @@ class RapportHebdoMail extends Mailable
     public array $data;
     public string $pdfPath;
 
-    public function __construct(Site $site, array $data, string $pdfPath)
+    public function __construct(Site $site, array $data, string $pdfPath = '')
     {
         $this->site    = $site;
         $this->data    = $data;
@@ -28,7 +27,7 @@ class RapportHebdoMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "MonitorPro Rapport hebdomadaire — {$this->site->client_name}",
+            subject: "MonitorPro — Rapport hebdomadaire : {$this->site->client_name}",
         );
     }
 
@@ -36,16 +35,18 @@ class RapportHebdoMail extends Mailable
     {
         return new Content(
             view: 'emails.rapport-hebdo',
-            with: array_merge(['site' => $this->site], $this->data),
         );
     }
 
-    public function attachments(): array
-    {
+   public function attachments(): array
+{
+    if (!empty($this->pdfPath) && file_exists($this->pdfPath)) {
         return [
-            Attachment::fromPath($this->pdfPath)
-                ->as("rapport_{$this->site->client_name}_" . now()->format('Y-m-d') . ".pdf")
+            \Illuminate\Mail\Mailables\Attachment::fromPath($this->pdfPath)
+                ->as('Rapport-' . $this->site->client_name . '-' . date('d-m-Y') . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }
+    return [];
+}
 }

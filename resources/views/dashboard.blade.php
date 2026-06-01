@@ -352,7 +352,7 @@
             <tr>
                 <td style="font-weight:600; color:var(--text);">{{ $inc->site->client_name }}</td>
                 <td><span class="badge {{ $inc->type == 'offline' ? 'badge-danger' : 'badge-warning' }}">{{ ucfirst($inc->type) }}</span></td>
-                <td class="text-sm font-mono">{{ $inc->started_at->format('d/m/Y H:i') }}</td>
+                <td class="text-sm font-mono">{{ $inc->started_at->timezone('Africa/Casablanca')->format('d/m/Y H:i') }}</td>
                 <td class="font-mono">
                     @if($inc->duration_min) {{ $inc->duration_min }} min
                     @else <span class="text-muted">En cours</span>
@@ -467,10 +467,13 @@ new Chart(document.getElementById('weekChart'), {
 // ─── Countdown auto-refresh ────────────────────
 let countdown = 30;
 const el = document.getElementById('countdown');
-setInterval(() => {
+const timer = setInterval(() => {
     countdown--;
     if (el) el.textContent = countdown;
-    if (countdown <= 0) location.reload();
+    if (countdown <= 0) {
+        clearInterval(timer);
+        location.reload();
+    }
 }, 1000);
 
 // ─── Check Now ─────────────────────────────────

@@ -59,7 +59,7 @@
             <tbody>
             @forelse($alertes ?? [] as $a)
                 <tr>
-                    <td class="text-sm font-mono">{{ $a->sent_at ? $a->sent_at->format('d/m/Y H:i:s') : '—' }}</td>
+                    <td class="text-sm font-mono">{{ $a->sent_at ? $a->sent_at->timezone('Africa/Casablanca')->format('d/m/Y H:i:s') : '—' }}</td>
                     <td style="font-weight:600; color:var(--text);">{{ $a->incident->site->client_name ?? '—' }}</td>
                     <td>
                         @if($a->type === 'down')
