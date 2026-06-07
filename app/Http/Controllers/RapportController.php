@@ -74,52 +74,106 @@ class RapportController extends Controller {
         return $pdf->download("rapport_{$site->client_name}.pdf");
     }
 
-    public function sendEmail(Request $request, Site $site) {
-        $request->validate(['email' => 'required|email']);
 
-        $periodStart = now()->subDays(30);
-        $periodEnd   = now();
+    public function sendEmail(Request $request, Site $site)
+{
+    $request->validate(['email' => 'required|email']);
 
-        $verifications = $site->verifications()
-            ->where('checked_at', '>=', $periodStart)
-            ->orderBy('checked_at', 'desc')->get();
+    $periodStart = now()->subDays(30);
+    $periodEnd   = now();
 
-        $total       = $verifications->count();
-        $up          = $verifications->where('is_up', true)->count();
-        $uptimePct   = $total > 0 ? round($up / $total * 100, 2) : 100;
-        $avgResponse = $verifications->avg('response_time_ms') ?? 0;
-        $incidents   = $site->incidents()
-            ->where('started_at', '>=', $periodStart)->get();
+    $verifications = $site->verifications()
+        ->where('checked_at', '>=', $periodStart)
+        ->orderBy('checked_at', 'desc')->get();
 
-        $pdf = Pdf::loadView('rapports.pdf', compact(
-            'site', 'verifications', 'uptimePct',
-            'avgResponse', 'incidents', 'periodStart', 'periodEnd'
-        ));
+    $total       = $verifications->count();
+    $up          = $verifications->where('is_up', true)->count();
+    $uptimePct   = $total > 0 ? round($up / $total * 100, 2) : 100;
+    $avgResponse = $verifications->avg('response_time_ms') ?? 0;
+    $incidents   = $site->incidents()
+        ->where('started_at', '>=', $periodStart)->get();
 
-        Mail::raw(
-            "Veuillez trouver ci-joint le rapport de disponibilite de {$site->client_name}.\n\n-- MonitorPro | Soft Seven Art",
-            function($m) use ($request, $site, $pdf) {
-                $m->to($request->email)
-                  ->subject("Rapport disponibilite — {$site->client_name}")
-                  ->attachData($pdf->output(), "rapport_{$site->client_name}.pdf");
-            }
-        );
+    $pdf = Pdf::loadView('rapports.pdf', compact(
+        'site', 'verifications', 'uptimePct',
+        'avgResponse', 'incidents', 'periodStart', 'periodEnd'
+    ));
 
-        // ═══ AUDIT LOG ═══
-        AuditService::log(
+    Mail::raw(
+        "Veuillez trouver ci-joint le rapport de disponibilite de {$site->client_name}.\n\n-- MonitorPro | Soft Seven Art",
+        function ($m) use ($request, $site, $pdf) {
+            $m->to($request->email)
+              ->subject("Rapport disponibilite — {$site->client_name}")
+              ->attachData($pdf->output(), "rapport_{$site->client_name}.pdf");
+        }
+    );
+
+    // ═══ AUDIT LOG ═══
+    try {
+        \App\Services\AuditService::log(
             action:      'report_emailed',
             category:    'report',
             description: "Envoi par email du rapport « {$site->client_name} » vers {$request->email}",
             model:       $site,
             newValues:   [
-                'site'        => $site->client_name,
-                'email_to'    => $request->email,
-                'uptime_pct'  => $uptimePct,
+                'site'       => $site->client_name,
+                'email_to'   => $request->email,
+                'uptime_pct' => $uptimePct,
             ]
         );
-
-        return back()->with('success', "Rapport envoyé à {$request->email} !");
+        \Log::info('[AUDIT OK] report_emailed pour ' . $site->client_name . ' → ' . $request->email);
+    } catch (\Throwable $e) {
+        \Log::error('[AUDIT FAIL] report_emailed : ' . $e->getMessage());
     }
+
+    return back()->with('success', "Rapport envoyé à {$request->email} !");
+}
+
+    // public function sendEmail(Request $request, Site $site) {
+    //     $request->validate(['email' => 'required|email']);
+
+    //     $periodStart = now()->subDays(30);
+    //     $periodEnd   = now();
+
+    //     $verifications = $site->verifications()
+    //         ->where('checked_at', '>=', $periodStart)
+    //         ->orderBy('checked_at', 'desc')->get();
+
+    //     $total       = $verifications->count();
+    //     $up          = $verifications->where('is_up', true)->count();
+    //     $uptimePct   = $total > 0 ? round($up / $total * 100, 2) : 100;
+    //     $avgResponse = $verifications->avg('response_time_ms') ?? 0;
+    //     $incidents   = $site->incidents()
+    //         ->where('started_at', '>=', $periodStart)->get();
+
+    //     $pdf = Pdf::loadView('rapports.pdf', compact(
+    //         'site', 'verifications', 'uptimePct',
+    //         'avgResponse', 'incidents', 'periodStart', 'periodEnd'
+    //     ));
+
+    //     Mail::raw(
+    //         "Veuillez trouver ci-joint le rapport de disponibilite de {$site->client_name}.\n\n-- MonitorPro | Soft Seven Art",
+    //         function($m) use ($request, $site, $pdf) {
+    //             $m->to($request->email)
+    //               ->subject("Rapport disponibilite — {$site->client_name}")
+    //               ->attachData($pdf->output(), "rapport_{$site->client_name}.pdf");
+    //         }
+    //     );
+
+    //     // ═══ AUDIT LOG ═══
+    //     AuditService::log(
+    //         action:      'report_emailed',
+    //         category:    'report',
+    //         description: "Envoi par email du rapport « {$site->client_name} » vers {$request->email}",
+    //         model:       $site,
+    //         newValues:   [
+    //             'site'        => $site->client_name,
+    //             'email_to'    => $request->email,
+    //             'uptime_pct'  => $uptimePct,
+    //         ]
+    //     );
+
+    //     return back()->with('success', "Rapport envoyé à {$request->email} !");
+    // }
 
     /**
      * Télécharger un rapport existant.

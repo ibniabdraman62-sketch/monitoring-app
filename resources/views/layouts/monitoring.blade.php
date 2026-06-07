@@ -680,36 +680,38 @@
             <i class="fas fa-robot"></i> Assistant IA
         </a>
 
-        @if(auth()->check() && auth()->user()->isSuperAdmin())
-        <div class="nav-section">Administration</div>
-        <a href="{{ route('cron.index') }}"
-           class="nav-item {{ request()->routeIs('cron.*') ? 'active' : '' }}">
-            <i class="fas fa-clock"></i> Supervision Cron
-        </a>
-        <a href="{{ route('agents.index') }}"
-           class="nav-item {{ request()->routeIs('agents.*') ? 'active' : '' }}">
-            <i class="fas fa-users-cog"></i> Gestion Agents
-        </a>
-        <a href="{{ route('audit.index') }}"
-           class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
-            <i class="fas fa-clock-rotate-left"></i> Historique d'audit
-        </a>
-<!-- <div class="nav-section">Administration</div>
-<a href="{{ route('cron.index') }}"
-   class="nav-item {{ request()->routeIs('cron.*') ? 'active' : '' }}">
-    <i class="fas fa-clock"></i> Supervision Cron
-</a>
-<a href="{{ route('agents.index') }}"
-   class="nav-item {{ request()->routeIs('agents.*') ? 'active' : '' }}">
-    <i class="fas fa-users-cog"></i> Gestion Agents
-</a> -->
+    {{-- ═══════════ ADMINISTRATION ═══════════ --}}
+        @auth
+@if(auth()->user()->role !== 'client')
+                <div class="nav-section">Administration</div>
 
-{{-- ═══ AJOUTER CE LIEN ═══ --}}
-<a href="{{ route('clients.index') }}"
-   class="nav-item {{ request()->routeIs('clients.*') ? 'active' : '' }}">
-    <i class="fas fa-user-tie"></i> Gestion Clients
-</a>
-@endif
+                <a href="{{ route('statistiques.index') }}"
+                   class="nav-item {{ request()->routeIs('statistiques.*') ? 'active' : '' }}">
+                    <i class="fas fa-chart-pie"></i> Statistiques
+                </a>
+
+                <a href="{{ route('audit.index') }}"
+                   class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
+                    <i class="fas fa-clock-rotate-left"></i> Historique d'audit
+                </a>
+
+                <a href="{{ route('clients.index') }}"
+                   class="nav-item {{ request()->routeIs('clients.*') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i> Gestion Clients
+                </a>
+
+                @if(auth()->user()->isSuperAdmin())
+                    <a href="{{ route('cron.index') }}"
+                       class="nav-item {{ request()->routeIs('cron.*') ? 'active' : '' }}">
+                        <i class="fas fa-clock"></i> Supervision Cron
+                    </a>
+                    <a href="{{ route('agents.index') }}"
+                       class="nav-item {{ request()->routeIs('agents.*') ? 'active' : '' }}">
+                        <i class="fas fa-users-cog"></i> Gestion Agents
+                    </a>
+                @endif
+            @endif
+        @endauth
 
         <div class="nav-section">Compte</div>
         <a href="{{ route('profile.edit') }}"

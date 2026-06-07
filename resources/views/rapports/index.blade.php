@@ -57,6 +57,7 @@
         <button type="submit" class="btn-primary btn-gold">
             <i class="fas fa-paper-plane"></i> Envoyer
         </button>
+        <x-export-button :route="route('export.rapports')" label="Exporter Rapports" />
     </form>
 </div>
 

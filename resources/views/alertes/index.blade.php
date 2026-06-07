@@ -27,6 +27,7 @@
                 @endforeach
             </select>
         </div>
+        <x-export-button :route="route('export.alertes')" label="Exporter Alertes" />
         @if(request('type') || request('site_id'))
             <a href="{{ route('alertes.index') }}" class="btn-secondary btn-sm">
                 <i class="fas fa-undo"></i> Réinitialiser

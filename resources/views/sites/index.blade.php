@@ -35,8 +35,9 @@
     <a href="{{ route('sites.create') }}" class="btn-primary">
         <i class="fas fa-plus"></i> Ajouter un site
     </a>
-@endif  
-</div>
+
+    <x-export-button :route="route('export.sites')" label="Exporter Sites" />
+@endif
 
 {{-- ═══ Table des sites ═══ --}}
 <div class="table-wrapper">

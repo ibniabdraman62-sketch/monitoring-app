@@ -149,6 +149,7 @@
                 @endforeach
             </select>
         </div>
+        <x-export-button :route="route('export.incidents')" label="Exporter Incidents" />
         @if(request('type') || request('status') || request('site_id'))
             <a href="{{ route('incidents.index') }}" class="btn-secondary btn-sm">
                 <i class="fas fa-undo"></i> Réinitialiser
