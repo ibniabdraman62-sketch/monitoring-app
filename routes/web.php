@@ -298,6 +298,10 @@ Route::post('/clients/quick-create', function (\Illuminate\Http\Request $request
 
     Route::middleware(['auth', 'active_user', 'not_client'])->group(function () {
 
+    // ═══ Historique d'audit (admin uniquement) ═══
+Route::get('/audit', [\App\Http\Controllers\AuditController::class, 'index'])->name('audit.index');
+Route::get('/audit/{auditLog}', [\App\Http\Controllers\AuditController::class, 'show'])->name('audit.show');
+
     // ═══ Page Gestion Clients ═══
 Route::get('/clients', function () {
     return view('admin.clients');

@@ -4,8 +4,7 @@
 
 @section('content')
 
-<div style="display:grid; grid-template-columns:300px 1fr; gap:24px; height:calc(100vh - 160px);">
-
+<div style="display:grid; grid-template-columns:300px 1fr; gap:24px; height:calc(100vh - 220px); max-height:780px; min-height:600px;">
     {{-- ═══ PANNEAU GAUCHE ═══ --}}
     <div style="display:flex; flex-direction:column; gap:16px;">
 

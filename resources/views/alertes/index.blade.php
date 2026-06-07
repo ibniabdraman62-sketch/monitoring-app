@@ -92,6 +92,11 @@
             @endforelse
             </tbody>
         </table>
+        @if($alertes->hasPages())
+    <div style="padding:16px 20px; border-top:1px solid var(--border); background:var(--bg-soft);">
+        {{ $alertes->links('vendor.pagination.monitorpro') }}
+    </div>
+@endif
     </div>
 </div>
 

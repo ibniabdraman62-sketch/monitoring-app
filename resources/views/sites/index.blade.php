@@ -4,6 +4,7 @@
 
 @section('content')
 
+
 {{-- ═══ Header actions ═══ --}}
 <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
     <form method="GET" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">

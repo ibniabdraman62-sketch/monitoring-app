@@ -4,12 +4,98 @@
 
 @section('content')
 
-@php
-    $totalIncidents = ($incidents ?? collect())->count();
-    $activeCount    = ($incidents ?? collect())->where('is_resolved', false)->count();
-    $resolvedCount  = ($incidents ?? collect())->where('is_resolved', true)->count();
-    $avgDuration    = round(($incidents ?? collect())->where('is_resolved', true)->avg('duration_min') ?? 0);
-@endphp
+{{-- ═══ NOUVELLE PALETTE KPI CARDS MODERNE ═══ --}}
+<style>
+.kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+    margin-bottom: 28px !important;
+}
+
+.kpi-card {
+    position: relative;
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 16px !important;
+    padding: 24px 24px 24px 28px !important;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    border-radius: 16px 0 0 16px;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10) !important;
+}
+
+.kpi-card .kpi-label {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #6B7280 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    margin-bottom: 12px !important;
+}
+
+.kpi-card .kpi-value {
+    font-size: 38px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -1px !important;
+}
+
+.kpi-card .kpi-icon {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 56px !important;
+    opacity: 0.08 !important;
+}
+
+/* ─── Card BLUE (Total sites) ─── */
+.kpi-card.blue::before { background: linear-gradient(180deg, #6366F1, #4F46E5); }
+.kpi-card.blue .kpi-value { color: #4F46E5 !important; }
+.kpi-card.blue .kpi-icon { color: #4F46E5 !important; }
+.kpi-card.blue:hover { border-color: #C7D2FE !important; }
+
+/* ─── Card GREEN (Sites actifs) ─── */
+.kpi-card.green::before { background: linear-gradient(180deg, #34D399, #10B981); }
+.kpi-card.green .kpi-value { color: #059669 !important; }
+.kpi-card.green .kpi-icon { color: #10B981 !important; }
+.kpi-card.green:hover { border-color: #A7F3D0 !important; }
+
+/* ─── Card RED (Incidents actifs) ─── */
+.kpi-card.red::before { background: linear-gradient(180deg, #F87171, #EF4444); }
+.kpi-card.red .kpi-value { color: #DC2626 !important; }
+.kpi-card.red .kpi-icon { color: #EF4444 !important; }
+.kpi-card.red:hover { border-color: #FECACA !important; }
+
+/* ─── Card GOLD (Disponibilité) ─── */
+.kpi-card.gold::before { background: linear-gradient(180deg, #FBBF24, #F59E0B); }
+.kpi-card.gold .kpi-value { color: #D97706 !important; }
+.kpi-card.gold .kpi-icon { color: #F59E0B !important; }
+.kpi-card.gold:hover { border-color: #FDE68A !important; }
+
+/* ─── Responsive ─── */
+@media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr !important; }
+}
+</style>
 
 {{-- ═══ KPIs ═══ --}}
 <div class="kpi-grid">
@@ -138,6 +224,13 @@
             </tbody>
         </table>
     </div>
+
+    {{-- ═══ Pagination ═══ --}}
+    @if($incidents->hasPages())
+        <div style="padding:16px 20px; border-top:1px solid var(--border); background:var(--bg-soft);">
+            {{ $incidents->links('vendor.pagination.monitorpro') }}
+        </div>
+    @endif
 </div>
 
 {{-- ═══ Script auto-submit (FIX) ═══ --}}

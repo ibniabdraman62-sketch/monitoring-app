@@ -690,8 +690,10 @@
            class="nav-item {{ request()->routeIs('agents.*') ? 'active' : '' }}">
             <i class="fas fa-users-cog"></i> Gestion Agents
         </a>
-        @endif
-        @if(auth()->check() && auth()->user()->isSuperAdmin())
+        <a href="{{ route('audit.index') }}"
+           class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
+            <i class="fas fa-clock-rotate-left"></i> Historique d'audit
+        </a>
 <!-- <div class="nav-section">Administration</div>
 <a href="{{ route('cron.index') }}"
    class="nav-item {{ request()->routeIs('cron.*') ? 'active' : '' }}">

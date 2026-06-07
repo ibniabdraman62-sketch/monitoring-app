@@ -4,6 +4,231 @@
 
 @section('content')
 
+{{-- ═══ NOUVELLE PALETTE KPI CARDS MODERNE ═══ --}}
+<style>
+.kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+    margin-bottom: 28px !important;
+}
+
+.kpi-card {
+    position: relative;
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 16px !important;
+    padding: 24px 24px 24px 28px !important;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    border-radius: 16px 0 0 16px;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10) !important;
+}
+
+.kpi-card .kpi-label {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #6B7280 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    margin-bottom: 12px !important;
+}
+
+.kpi-card .kpi-value {
+    font-size: 38px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -1px !important;
+}
+
+.kpi-card .kpi-icon {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 56px !important;
+    opacity: 0.08 !important;
+}
+
+/* ─── Card BLUE (Total sites) ─── */
+.kpi-card.blue::before { background: linear-gradient(180deg, #6366F1, #4F46E5); }
+.kpi-card.blue .kpi-value { color: #4F46E5 !important; }
+.kpi-card.blue .kpi-icon { color: #4F46E5 !important; }
+.kpi-card.blue:hover { border-color: #C7D2FE !important; }
+
+/* ─── Card GREEN (Sites actifs) ─── */
+.kpi-card.green::before { background: linear-gradient(180deg, #34D399, #10B981); }
+.kpi-card.green .kpi-value { color: #059669 !important; }
+.kpi-card.green .kpi-icon { color: #10B981 !important; }
+.kpi-card.green:hover { border-color: #A7F3D0 !important; }
+
+/* ─── Card RED (Incidents actifs) ─── */
+.kpi-card.red::before { background: linear-gradient(180deg, #F87171, #EF4444); }
+.kpi-card.red .kpi-value { color: #DC2626 !important; }
+.kpi-card.red .kpi-icon { color: #EF4444 !important; }
+.kpi-card.red:hover { border-color: #FECACA !important; }
+
+/* ─── Card GOLD (Disponibilité) ─── */
+.kpi-card.gold::before { background: linear-gradient(180deg, #FBBF24, #F59E0B); }
+.kpi-card.gold .kpi-value { color: #D97706 !important; }
+.kpi-card.gold .kpi-icon { color: #F59E0B !important; }
+.kpi-card.gold:hover { border-color: #FDE68A !important; }
+
+/* ─── Responsive ─── */
+@media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ═══ UPTIME RING MODERNE ═══ */
+.uptime-card-modern {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%) !important;
+    border: 1px solid #E5E7EB !important;
+    padding: 28px 20px !important;
+}
+
+.uptime-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.uptime-particles span {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(99, 102, 241, 0.15);
+    border-radius: 50%;
+    animation: floatParticle 6s infinite ease-in-out;
+}
+
+.uptime-particles span:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+.uptime-particles span:nth-child(2) { top: 75%; left: 20%; animation-delay: 1.5s; }
+.uptime-particles span:nth-child(3) { top: 30%; right: 15%; animation-delay: 3s; }
+.uptime-particles span:nth-child(4) { bottom: 20%; right: 10%; animation-delay: 4.5s; }
+
+@keyframes floatParticle {
+    0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+    50%      { transform: translate(8px, -12px); opacity: 0.8; }
+}
+
+.uptime-ring-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 14px 0;
+    z-index: 2;
+}
+
+.uptime-ring-svg {
+    transform: scale(0.95);
+    transition: transform 0.4s ease;
+}
+
+.uptime-ring-svg:hover {
+    transform: scale(1);
+}
+
+.uptime-ring-progress {
+    transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: drawRing 2s ease-out;
+}
+
+@keyframes drawRing {
+    from { stroke-dashoffset: 502; }
+}
+
+.pulse-glow {
+    animation: drawRing 2s ease-out, pulseGlow 2.5s infinite ease-in-out 2s;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { filter: url(#glow) drop-shadow(0 0 4px #34D399); }
+    50%      { filter: url(#glow) drop-shadow(0 0 12px #10B981); }
+}
+
+.uptime-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+}
+
+.uptime-percent {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.uptime-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6B7280;
+    letter-spacing: 2px;
+    margin-top: 6px;
+}
+
+.uptime-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-top: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+    z-index: 2;
+}
+
+.uptime-status-badge:hover {
+    transform: scale(1.05);
+}
+
+.uptime-status-badge.excellent {
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    color: #065F46;
+    border: 1px solid #6EE7B7;
+}
+
+.uptime-status-badge.acceptable {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    border: 1px solid #FCD34D;
+}
+
+.uptime-status-badge.critique {
+    background: linear-gradient(135deg, #FEE2E2, #FECACA);
+    color: #991B1B;
+    border: 1px solid #FCA5A5;
+}
+
+</style>
+
+
+
 {{-- ═══════ KPIs ═══════ --}}
 <div class="kpi-grid">
     <div class="kpi-card blue">
@@ -44,30 +269,84 @@
         <canvas id="responseChart" style="max-height:280px;"></canvas>
     </div>
 
-    <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <div class="card-title" style="text-align:center;">
-            <i class="fas fa-chart-pie" style="color:var(--primary);"></i>
-            Disponibilité 24h
-        </div>
-        <div style="position:relative; width:180px; height:180px;">
-            <canvas id="uptimeDonut"></canvas>
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                <div style="font-size:28px; font-weight:700;
-                            color:{{ $uptimeMoyen >= 99 ? 'var(--success)' : ($uptimeMoyen >= 95 ? 'var(--warning)' : 'var(--danger)') }};">
-                    {{ $uptimeMoyen }}%
-                </div>
-                <div class="text-xs text-muted" style="font-weight:600; letter-spacing:1px;">UPTIME</div>
+    <div class="card uptime-card-modern" style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+    {{-- Background particles --}}
+    <div class="uptime-particles">
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="card-title" style="text-align:center; position:relative; z-index:2;">
+        <i class="fas fa-chart-pie" style="color:var(--primary);"></i>
+        Disponibilité 24h
+    </div>
+
+    <div class="uptime-ring-container">
+        {{-- SVG Anneau animé --}}
+        <svg width="200" height="200" viewBox="0 0 200 200" class="uptime-ring-svg">
+            <defs>
+                <linearGradient id="gradientGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#34D399"/>
+                    <stop offset="100%" stop-color="#059669"/>
+                </linearGradient>
+                <linearGradient id="gradientOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FBBF24"/>
+                    <stop offset="100%" stop-color="#D97706"/>
+                </linearGradient>
+                <linearGradient id="gradientRed" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#F87171"/>
+                    <stop offset="100%" stop-color="#DC2626"/>
+                </linearGradient>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+
+            {{-- Anneau de fond --}}
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#F1F5F9" stroke-width="14"/>
+
+            {{-- Anneau animé --}}
+            @php
+                $stroke = $uptimeMoyen >= 99 ? 'url(#gradientGreen)' : ($uptimeMoyen >= 95 ? 'url(#gradientOrange)' : 'url(#gradientRed)');
+                $circumference = 2 * 3.14159 * 80;
+                $offset = $circumference - ($circumference * $uptimeMoyen / 100);
+            @endphp
+            <circle cx="100" cy="100" r="80" fill="none"
+                    stroke="{{ $stroke }}"
+                    stroke-width="14"
+                    stroke-linecap="round"
+                    stroke-dasharray="{{ $circumference }}"
+                    stroke-dashoffset="{{ $offset }}"
+                    transform="rotate(-90 100 100)"
+                    filter="url(#glow)"
+                    class="uptime-ring-progress {{ $uptimeMoyen >= 99 ? 'pulse-glow' : '' }}"/>
+        </svg>
+
+        {{-- Centre — Valeur + label --}}
+        <div class="uptime-center">
+            <div class="uptime-percent"
+                 data-target="{{ $uptimeMoyen }}"
+                 style="color:{{ $uptimeMoyen >= 99 ? '#059669' : ($uptimeMoyen >= 95 ? '#D97706' : '#DC2626') }};">
+                0<span style="font-size:18px;">%</span>
             </div>
-        </div>
-        <div style="margin-top:14px;">
-            <span class="badge {{ $uptimeMoyen >= 99 ? 'badge-success' : ($uptimeMoyen >= 95 ? 'badge-warning' : 'badge-danger') }}">
-                @if($uptimeMoyen >= 99) Excellent
-                @elseif($uptimeMoyen >= 95) Acceptable
-                @else Critique
-                @endif
-            </span>
+            <div class="uptime-label">UPTIME</div>
         </div>
     </div>
+
+    {{-- Badge de statut --}}
+    <div class="uptime-status-badge {{ $uptimeMoyen >= 99 ? 'excellent' : ($uptimeMoyen >= 95 ? 'acceptable' : 'critique') }}">
+        @if($uptimeMoyen >= 99)
+            <i class="fas fa-circle-check"></i> Excellent
+        @elseif($uptimeMoyen >= 95)
+            <i class="fas fa-circle-exclamation"></i> Acceptable
+        @else
+            <i class="fas fa-triangle-exclamation"></i> Critique
+        @endif
+    </div>
+</div>
 </div>
 
 {{-- ═══════ Disponibilité mois ═══════ --}}
@@ -417,6 +696,30 @@ function createChart(type) {
     });
 }
 
+// ─── Animation du compteur uptime ───
+(function animateUptime() {
+    const el = document.querySelector('.uptime-percent');
+    if (!el) return;
+    const target = parseFloat(el.dataset.target);
+    let current = 0;
+    const duration = 1800; // 1.8s
+    const startTime = performance.now();
+
+    function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Easing : easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        current = (target * eased).toFixed(1);
+        el.innerHTML = current + '<span style="font-size:18px;">%</span>';
+
+        if (progress < 1) requestAnimationFrame(update);
+        else el.innerHTML = target + '<span style="font-size:18px;">%</span>';
+    }
+    requestAnimationFrame(update);
+})();
+
+
 function setChartType(type) {
     createChart(type);
     document.getElementById('btn-line').className = type === 'line' ? 'btn-primary btn-xs' : 'btn-secondary btn-xs';
@@ -426,20 +729,20 @@ function setChartType(type) {
 createChart('line');
 
 // ─── Donut uptime ──────────────────────────────
-new Chart(document.getElementById('uptimeDonut'), {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [{{ $uptimeMoyen }}, {{ 100 - $uptimeMoyen }}],
-            backgroundColor: [
-                '{{ $uptimeMoyen >= 99 ? "#4A8C5A" : ($uptimeMoyen >= 95 ? "#C48A4A" : "#B66258") }}',
-                '#F0E8D4'
-            ],
-            borderWidth: 0,
-        }]
-    },
-    options: { cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, responsive: true, maintainAspectRatio: false }
-});
+// new Chart(document.getElementById('uptimeDonut'), {
+//     type: 'doughnut',
+//     data: {
+//         datasets: [{
+//             data: [{{ $uptimeMoyen }}, {{ 100 - $uptimeMoyen }}],
+//             backgroundColor: [
+//                 '{{ $uptimeMoyen >= 99 ? "#4A8C5A" : ($uptimeMoyen >= 95 ? "#C48A4A" : "#B66258") }}',
+//                 '#F0E8D4'
+//             ],
+//             borderWidth: 0,
+//         }]
+//     },
+//     options: { cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, responsive: true, maintainAspectRatio: false }
+// });
 
 // ─── HISTOGRAMME 7 JOURS — BARRES LARGES (comme avant) ─────
 const weekData = @json($weekData);

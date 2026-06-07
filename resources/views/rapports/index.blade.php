@@ -101,11 +101,9 @@
                     <td class="font-mono text-sm">{{ $r->incidents_count ?? 0 }}</td>
                     <td class="font-mono text-sm">{{ $r->avg_response_ms ?? 0 }} ms</td>
                     <td>
-                        @if($r->pdf_path)
-                            <a href="{{ asset('storage/rapports/' . $r->pdf_path) }}" target="_blank" class="btn-secondary btn-xs">
-                                <i class="fas fa-download"></i> Télécharger
-                            </a>
-                        @endif
+                        <a href="{{ route('rapports.download', $r) }}" class="btn-secondary btn-xs">
+    <i class="fas fa-download"></i> Rétélécharger
+</a>
                     </td>
                 </tr>
             @empty

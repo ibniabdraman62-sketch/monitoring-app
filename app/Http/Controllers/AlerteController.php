@@ -1,45 +1,66 @@
 <?php
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
+use App\Models\Alerte;
+use App\Models\Site;
 
-class AlerteController extends Controller {
-    // public function index() {
-    //     return view('alertes.index');
-    // }
+class AlerteController extends Controller
+{
+    public function index()
+    {
+        $user = auth()->user();
 
-    public function index() {
-    $query = \App\Models\Alerte::with(['incident.site'])
-        ->orderBy('sent_at','desc');
+        // ═══ Base query avec filtrage selon le rôle ═══
+        $baseQuery = Alerte::query();
 
-    if(request('site_id'))
-        $query->whereHas('incident', fn($q) => $q->where('site_id', request('site_id')));
-    if(request('type'))
-        $query->where('type', request('type'));
-    if(request('date_from'))
-        $query->where('sent_at', '>=', request('date_from'));
-    if(request('date_to'))
-        $query->where('sent_at', '<=', request('date_to').' 23:59:59');
-    if(request('search')) {
-    $query->whereHas('incident.site', fn($q) =>
-        $q->where('client_name', 'LIKE', '%'.request('search').'%')
-          ->orWhere('url', 'LIKE', '%'.request('search').'%')
-    );
-}
+        if ($user->role === 'client') {
+            // Le client ne voit QUE les alertes de SES sites
+            $baseQuery->whereHas('incident.site', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
 
-    $alertes = $query->paginate(20);
-    $user = auth()->user();
+        // ═══ Appliquer les filtres de la requête ═══
+        $filtered = (clone $baseQuery)->with(['incident.site'])
+            ->orderBy('sent_at', 'desc');
 
-if ($user->role === 'client') {
-    $sites = \App\Models\Site::where('user_id', $user->id)->get();
-} else {
-    $sites = \App\Models\Site::all();
-}
-    $stats = [
-        'total'    => \App\Models\Alerte::count(),
-        'down'     => \App\Models\Alerte::where('type','down')->count(),
-        'slow'     => \App\Models\Alerte::where('type','slow')->count(),
-        'resolved' => \App\Models\Alerte::where('type','resolved')->count(),
-    ];
-    return view('alertes.index', compact('alertes','sites','stats'));
-}
+        if (request('site_id')) {
+            $filtered->whereHas('incident', fn($q) => $q->where('site_id', request('site_id')));
+        }
+        if (request('type')) {
+            $filtered->where('type', request('type'));
+        }
+        if (request('date_from')) {
+            $filtered->where('sent_at', '>=', request('date_from'));
+        }
+        if (request('date_to')) {
+            $filtered->where('sent_at', '<=', request('date_to') . ' 23:59:59');
+        }
+        if (request('search')) {
+            $filtered->whereHas('incident.site', fn($q) =>
+                $q->where('client_name', 'LIKE', '%' . request('search') . '%')
+                  ->orWhere('url', 'LIKE', '%' . request('search') . '%')
+            );
+        }
+
+        $alertes = $filtered->paginate(20)->withQueryString();
+
+        // ═══ Liste des sites pour le filtre dropdown ═══
+        if ($user->role === 'client') {
+            $sites = Site::where('user_id', $user->id)->get();
+        } else {
+            $sites = Site::all();
+        }
+
+        // ═══ Statistiques (filtrées selon le rôle) ═══
+        $stats = [
+            'total'    => (clone $baseQuery)->count(),
+            'down'     => (clone $baseQuery)->where('type', 'down')->count(),
+            'slow'     => (clone $baseQuery)->where('type', 'slow')->count(),
+            'resolved' => (clone $baseQuery)->where('type', 'resolved')->count(),
+        ];
+
+        return view('alertes.index', compact('alertes', 'sites', 'stats'));
+    }
 }
