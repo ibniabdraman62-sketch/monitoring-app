@@ -8,6 +8,8 @@ use App\Http\Controllers\RapportController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\AgentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotificationController;
+
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -301,6 +303,14 @@ Route::post('/clients/quick-create', function (\Illuminate\Http\Request $request
     // ═══ Historique d'audit (admin uniquement) ═══
 Route::get('/audit', [\App\Http\Controllers\AuditController::class, 'index'])->name('audit.index');
 Route::get('/audit/{auditLog}', [\App\Http\Controllers\AuditController::class, 'show'])->name('audit.show');
+
+
+
+Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/',                [NotificationController::class, 'index'])->name('index');
+    Route::post('/{alerte}/lue',   [NotificationController::class, 'marquerLue'])->name('lue');
+    Route::post('/toutes-lues',    [NotificationController::class, 'marquerToutesLues'])->name('toutes-lues');
+});
 
     // ═══ Page Gestion Clients ═══
 Route::get('/clients', function () {

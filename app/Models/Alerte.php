@@ -31,4 +31,34 @@ class Alerte extends Model {
     }
 }
 
+public function lectures()
+{
+    return $this->hasMany(AlerteLecture::class);
+}
+
+public function lecteurs()
+{
+    return $this->belongsToMany(User::class, 'alerte_lectures')
+        ->withPivot('lu_at')
+        ->withTimestamps();
+}
+
+public function estLuePar(User $user): bool
+{
+    return $this->lectures()->where('user_id', $user->id)->exists();
+}
+
+/**
+ * Scope RBAC : aligne sur la logique existante d'AlerteController.
+ * Admin/Agent : tout le parc. Client : ses sites uniquement.
+ */
+public function scopeVisiblesPour($query, User $user)
+{
+    if (in_array($user->role, ['admin', 'agent'])) {
+        return $query;
+    }
+
+    return $query->whereHas('site', fn($q) => $q->where('user_id', $user->id));
+}
+
 }

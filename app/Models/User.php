@@ -47,4 +47,28 @@ class User extends Authenticatable
 //     return $this->hasMany(Site::class);
 // }
 
+public function alerteLectures()
+{
+    return $this->hasMany(AlerteLecture::class);
+}
+
+public function alertesLues()
+{
+    return $this->belongsToMany(\App\Models\Alerte::class, 'alerte_lectures')
+        ->withPivot('lu_at')
+        ->withTimestamps();
+}
+
+public function notificationsNonLues()
+{
+    return \App\Models\Alerte::visiblesPour($this)
+        ->whereNotIn('id', $this->alertesLues()->pluck('alertes.id'));
+}
+
+public function compterNotificationsNonLues(): int
+{
+    return $this->notificationsNonLues()->count();
+}
+
+
 }
