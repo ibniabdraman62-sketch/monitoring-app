@@ -8,7 +8,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![License](https://img.shields.io/badge/License-Academic-blue?style=for-the-badge)](LICENSE)
 
-> **Projet de Fin d'Etudes — Licence Informatique, Reseaux et Multimedia (IRM)**  
+> *Projet de Fin d'Etudes — Licence Informatique, Reseaux et Multimedia (IRM)*  
 > Faculte des Sciences et Techniques de Mohammedia (FSTM)  
 > Universite Hassan II de Casablanca — 2026
 
@@ -18,7 +18,7 @@
 
 ## Presentation
 
-**MonitorPro** est une application web complete developpee dans le cadre d'un stage de fin d'etudes chez **Soft Seven Art**, agence digitale basee a Casablanca. Elle permet de surveiller en temps reel la disponibilite, les performances et la securite des sites web clients, avec envoi automatique d'alertes par email, generation de rapports PDF et assistant intelligent base sur l'IA.
+*MonitorPro* est une application web complete developpee dans le cadre d'un stage de fin d'etudes chez *Soft Seven Art*, agence digitale basee a Casablanca. Elle permet de surveiller en temps reel la disponibilite, les performances et la securite des sites web clients, avec envoi automatique d'alertes par email, generation de rapports PDF, assistant intelligent base sur l'IA, systeme de traçabilite complet et export Excel multi-modules.
 
 ### Objectifs
 
@@ -29,6 +29,9 @@
 - Envoyer des alertes email automatiques via Brevo SMTP
 - Generer des rapports PDF hebdomadaires par client
 - Offrir un assistant conversationnel intelligent base sur Google Gemini
+- Tracer toutes les actions sensibles via un systeme d'audit log complet
+- Exporter les donnees metier au format Excel (.xlsx)
+- Notifier les utilisateurs en temps reel via une cloche in-app
 
 ---
 
@@ -36,18 +39,24 @@
 
 | Fonctionnalite | Description |
 |---|---|
-| **Dashboard temps reel** | KPIs, graphiques Chart.js, histogramme 7 jours, auto-refresh 30s |
-| **Surveillance uptime** | Verification HTTP/HTTPS automatique toutes les 5 minutes |
-| **Verification SSL** | Validite et date d'expiration, alertes a 30/15/7 jours |
-| **Verification WHOIS** | Informations registrar, expiration de domaine, alertes preventives |
-| **Alertes automatiques** | Email lors de panne, lenteur, resolution, expiration SSL/domaine |
-| **Rapports PDF** | Generation et envoi automatique de rapports hebdomadaires |
-| **Gestion multi-roles** | 3 profils : Super Administrateur, Agent, Client |
-| **Gestion des clients** | Creation, modification, desactivation, reset mot de passe |
-| **Email de bienvenue** | Envoi automatique des identifiants au client a la creation |
-| **Assistant IA** | Chatbot conversationnel base sur Google Gemini via n8n |
-| **Supervision Cron** | Tableau de bord des 5 taches planifiees avec historique |
-| **Securite renforcee** | 3 middlewares, blocage comptes desactives, isolation des donnees |
+| *Dashboard temps reel* | KPIs, graphiques Chart.js, histogramme 7 jours, anneau uptime SVG, auto-refresh 30s |
+| *Surveillance uptime* | Verification HTTP/HTTPS automatique toutes les 5 minutes |
+| *Verification SSL* | Validite et date d'expiration, alertes a 30/15/7 jours |
+| *Verification WHOIS* | Informations registrar, expiration de domaine, alertes preventives |
+| *Alertes automatiques* | Email lors de panne, lenteur, resolution, expiration SSL/domaine |
+| *Rapports PDF* | Generation et envoi automatique de rapports hebdomadaires |
+| *Gestion multi-roles* | 3 profils : Super Administrateur, Agent, Client |
+| *Gestion des clients* | Creation, modification, desactivation, reset mot de passe |
+| *Gestion des agents* | CRUD complet avec activation/desactivation |
+| *Email de bienvenue* | Envoi automatique des identifiants au client a la creation |
+| *Assistant IA (Chatbot)* | Chatbot natif Laravel via OpenRouter + Google Gemini 2.5 Flash |
+| *Rapport IA intelligent* | Analyse automatique du parc via workflow n8n + Google Gemini |
+| *Notifications in-app* | Cloche en topbar avec badge, dropdown 10 alertes, polling 30s |
+| *Statistiques globales* | Tableau de bord executif 30 jours (8 KPIs, 4 graphiques, top sites) |
+| *Audit log complet* | Tracabilite de toutes les actions sensibles avec interface de filtrage |
+| *Export Excel* | Export .xlsx formate pour Sites, Incidents, Alertes et Rapports |
+| *Supervision Cron* | Tableau de bord des 5 taches planifiees avec declenchement manuel |
+| *Securite renforcee* | RBAC 3 niveaux, middlewares, isolation des donnees par client |
 
 ---
 
@@ -59,12 +68,14 @@
 |---|---|---|
 | Laravel | 10.x | Framework PHP MVC |
 | PHP | 8.3 | Langage de programmation |
-| MySQL | 8.4 | Base de donnees relationnelle |
+| MySQL | 8.4 | Base de donnees relationnelle (15 tables) |
 | Guzzle HTTP | 7.x | Client HTTP pour le monitoring |
 | DomPDF | 3.1 | Generation de rapports PDF |
+| Maatwebsite/Excel | 3.1 | Export Excel (.xlsx) via PhpSpreadsheet |
 | Laravel Breeze | 1.x | Authentification |
 | Laravel Scheduler | — | Automatisation des taches planifiees |
 | Laravel Queues | — | Traitement asynchrone des jobs |
+| Laravel Events | — | Listeners d'audit (Login, Logout, Failed, PasswordReset) |
 
 ### Frontend
 
@@ -74,22 +85,24 @@
 | CSS personnalise | — | Palette beige cream + bleu ciel professionnel |
 | Chart.js | Latest | Graphiques et visualisations |
 | Font Awesome | 6.5 | Icones |
+| SVG + JavaScript | — | Anneau uptime anime, carte sante du parc |
 
 ### Services externes
 
 | Service | Role |
 |---|---|
 | Brevo SMTP | Envoi des emails d'alerte et de bienvenue (port 587 TLS) |
-| n8n Cloud | Orchestration du workflow IA |
-| Google Gemini | Modele de langage pour l'assistant conversationnel |
-| ngrok | Exposition de l'API locale pour n8n |
+| OpenRouter API | Passerelle LLM pour le chatbot (google/gemini-2.5-flash) |
+| n8n Cloud | Orchestration du workflow IA pour le rapport intelligent |
+| Google Gemini | Modele de langage pour l'assistant conversationnel et le rapport |
+| ngrok | Exposition de l'API locale pour le workflow n8n |
 | Laragon | Environnement de developpement local (Apache + MySQL + PHP) |
 
 ---
 
 ## Architecture du monitoring
 
-```
+
 Scheduler Laravel  (php artisan schedule:work)
 │
 ├── monitor:check-uptime          (toutes les 5 min)
@@ -118,18 +131,42 @@ Scheduler Laravel  (php artisan schedule:work)
 Queue Worker  (php artisan queue:work --tries=3)
 └── Consomme les jobs depuis la table "jobs"
         └── En cas d'echec  →  table "failed_jobs" (apres 3 tentatives)
-```
+
 
 ### Architecture du Chatbot IA
 
-```
+
 Navigateur (JS fetch)
-└── POST /chatbot/send   [route Laravel — proxy anti-CORS]
-        └── Http::post()  →  n8n Cloud webhook
-                └── Workflow n8n  →  Google Gemini API
-                        └── Reponse formatee (Markdown, tableaux)
-                                └── Retour navigateur  →  Affichage
-```
+└── POST /chatbot/send   [route Laravel — integration native]
+        └── Collecte donnees monitoring temps reel (sites, incidents, SSL)
+                └── Construction prompt contextuel structure
+                        └── Http::post()  →  OpenRouter API
+                                └── google/gemini-2.5-flash
+                                        └── Reponse Markdown  →  Rendu HTML
+
+
+### Architecture du Rapport Intelligent (Dashboard)
+
+
+Workflow n8n Cloud
+└── GET /api/monitoring-data  (via ngrok tunnel)
+        └── Collecte etat complet du parc
+                └── Formatage contexte structure
+                        └── Google Gemini API
+                                └── Analyse en francais
+                                        └── Rapport Markdown  →  Dashboard
+
+
+### Architecture du Systeme d'Audit
+
+
+Action utilisateur (login, CRUD site, rapport...)
+└── Controleur ou Listener Laravel
+        └── AuditService::log()   [service centralise]
+                └── AuditLog::create()
+                        └── Table audit_logs
+                                └── Interface /audit  (admin uniquement)
+
 
 ---
 
@@ -141,17 +178,23 @@ Navigateur (JS fetch)
 | Voir ses propres sites | ✅ | ✅ | ✅ |
 | Ajouter / Modifier / Supprimer des sites | ✅ | ✅ | ❌ |
 | Gestion des agents | ✅ | ❌ | ❌ |
-| Gestion des clients | ✅ | ❌ | ❌ |
+| Gestion des clients | ✅ | ✅ | ❌ |
 | Supervision Cron Jobs | ✅ | ❌ | ❌ |
 | Assistant IA | ✅ | ✅ | ✅ |
 | Rapports et alertes | ✅ | ✅ | Les siens uniquement |
+| Statistiques globales | ✅ | ✅ | ❌ |
+| Historique d'audit | ✅ | ❌ | ❌ |
+| Export Excel | ✅ | ✅ | Les siens uniquement |
+| Notifications in-app | ✅ | ✅ | Les siennes uniquement |
+
+```
 
 ---
 
 ## Structure de la base de donnees
 
-```
-monitoring_db  —  13 tables
+
+monitoring_db  —  15 tables
 │
 ├── Tables metier (8)
 │   ├── users                →  Utilisateurs (super_admin / agent / client)
@@ -163,13 +206,17 @@ monitoring_db  —  13 tables
 │   ├── rapports             →  Rapports PDF generes
 │   └── cron_logs            →  Historique d'execution des taches planifiees
 │
+├── Tables techniques complementaires (2)
+│   ├── audit_logs           →  Journal d'audit (traçabilite des actions sensibles)
+│   └── alerte_lectures      →  Statut de lecture des notifications in-app
+│
 └── Tables systeme Laravel (5)
     ├── jobs                      →  File d'attente des jobs asynchrones
     ├── failed_jobs               →  Jobs en echec
     ├── migrations                →  Historique des migrations
     ├── password_reset_tokens     →  Tokens de reinitialisation
     └── personal_access_tokens    →  Tokens d'acces API
-```
+
 
 ---
 
@@ -208,12 +255,12 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 # 6. Creer la base de donnees "monitoring_db" dans MySQL
-# puis executer les migrations
+# puis executer les migrations (15 tables)
 php artisan migrate
 
 # 7. Creer le lien symbolique pour le stockage
 php artisan storage:link
-```
+
 
 ### Configuration Email — Brevo SMTP
 
@@ -228,14 +275,22 @@ MAIL_FROM_ADDRESS="monitoring@softseven.ma"
 MAIL_FROM_NAME="MonitorPro"
 ```
 
-> Brevo (ex-Sendinblue) est utilise pour l'envoi de tous les emails :
-> alertes automatiques, rapports hebdomadaires et emails de bienvenue clients.
+### Configuration IA — OpenRouter (Chatbot)
+
+```env
+OPENROUTER_API_KEY=votre_cle_openrouter
+
+
+```
+
+> OpenRouter est utilise pour le chatbot conversationnel (modele google/gemini-2.5-flash).
+> Le rapport intelligent du dashboard utilise un workflow n8n separe via ngrok.
 
 ---
 
 ## Lancement
 
-Ouvrir **deux terminaux** dans le dossier du projet apres avoir demarre Laragon :
+Ouvrir *trois terminaux* dans le dossier du projet apres avoir demarre Laragon :
 
 ```bash
 # Laragon : demarrer Apache + MySQL depuis l'interface graphique
@@ -247,14 +302,14 @@ php artisan schedule:work
 # Terminal 2 — Queue Worker (execution asynchrone des jobs)
 php artisan queue:work --tries=3
 
-# Terminal 3 — Optionnel : exposition via ngrok (pour n8n)
+# Terminal 3 — Optionnel : exposition via ngrok (pour rapport IA n8n)
 ngrok http --host-header=rewrite monitoring-app.test:80
-```
 
-> **Important** : les terminaux 1 et 2 doivent rester ouverts en permanence
+
+> *Important* : les terminaux 1 et 2 doivent rester ouverts en permanence
 > pour que le monitoring automatique et les alertes fonctionnent.
 
-**Acceder a l'application** : http://monitoring-app.test
+*Acceder a l'application* : http://monitoring-app.test
 
 ---
 
@@ -262,50 +317,61 @@ ngrok http --host-header=rewrite monitoring-app.test:80
 
 | Role | Email | Mot de passe |
 |---|---|---|
-| Super Administrateur | admin@softseven.ma | *(voir UserSeeder)* |
-| Agent | agent@softseven.ma | *(voir UserSeeder)* |
-| Client (exemple) | client@test.ma | *(defini a la creation)* |
+| Super Administrateur | admin@softseven.ma | SoftSeven@2026 |
+| Agent | agent@softseven.ma | Agent@2026 |
+| Client (exemple) | client@test.ma | Client@2026 |
 
-> Les clients sont crees depuis l'interface **Gestion Clients** ou lors de l'ajout
-> d'un site via le bouton **"Nouveau client"** dans le formulaire.
+> Les clients sont crees depuis l'interface *Gestion Clients* ou lors de l'ajout
+> d'un site via le bouton *"Nouveau client"* dans le formulaire.
+
+```
 
 ---
 
 ## Structure du projet
 
-```
+
 monitoring-app/
 ├── app/
 │   ├── Http/
-│   │   ├── Controllers/     →  Dashboard, Site, Incident, Alerte, Rapport, Agent...
+│   │   ├── Controllers/     →  Dashboard, Site, Incident, Alerte, Rapport,
+│   │   │                       Agent, Audit, Notification, Statistique, Export
 │   │   ├── Middleware/      →  CheckActiveUser.php, ClientMiddleware.php
 │   │   └── Kernel.php       →  Enregistrement des middlewares
 │   ├── Jobs/                →  CheckUptimeJob, CheckSslJob,
 │   │                           CheckWhoisJob, SendWeeklyReportJob
+│   ├── Listeners/           →  LogSuccessfulLogin, LogFailedLogin,
+│   │                           LogLogout, LogPasswordReset
+│   ├── Exports/             →  SitesExport, IncidentsExport,
+│   │                           AlertesExport, RapportsExport
 │   ├── Mail/                →  AlerteDownMail, AlerteSlowMail, AlerteSslMail,
 │   │                           AlerteDomainMail, AlerteResolvedMail,
 │   │                           RapportHebdoMail, ClientWelcomeMail
 │   ├── Models/              →  User, Site, Verification, Incident,
-│   │                           Alerte, Rapport, CronLog, WhoisInfo
-│   └── Services/            →  MonitoringService.php
+│   │                           Alerte, Rapport, CronLog, WhoisInfo,
+│   │                           AuditLog, AlerteLecture
+│   └── Services/            →  MonitoringService.php, AuditService.php
 ├── resources/
 │   └── views/
 │       ├── layouts/         →  monitoring.blade.php (layout principal)
+│       ├── components/      →  notification-bell.blade.php, export-button.blade.php
 │       ├── auth/            →  login, forgot-password, reset-password
 │       ├── admin/           →  cron_jobs, agents, clients
+│       ├── audit/           →  index (historique d'audit)
 │       ├── sites/           →  index, show, create, edit
 │       ├── alertes/         →  index
 │       ├── incidents/       →  index
 │       ├── rapports/        →  index, pdf
+│       ├── statistiques/    →  index (tableau de bord executif)
 │       ├── chatbot/         →  index
 │       ├── profile/         →  edit
 │       └── emails/          →  alerte-down, alerte-slow, alerte-ssl,
 │                                alerte-domain, alerte-resolved,
 │                                rapport-hebdo, client-welcome
 ├── database/
-│   └── migrations/          →  13 tables MySQL
-└── routes/web.php           →  Routes de l'application + proxy chatbot
-```
+│   └── migrations/          →  15 tables MySQL
+└── routes/web.php           →  Routes de l'application
+
 
 ---
 
@@ -329,7 +395,10 @@ php artisan route:list
 
 # Acceder a Tinker (console interactive)
 php artisan tinker
-```
+
+# Verifier le statut des migrations
+php artisan migrate:status
+
 
 ---
 
@@ -337,24 +406,24 @@ php artisan tinker
 
 <div align="center">
 
-**ABDRAMAN IBNI ABDRAMAN**  
+*ABDRAMAN IBNI ABDRAMAN*  
 Etudiant en Licence IRM — FSTM  
 ibniabdraman62@gmail.com  
-*Role : Developpement full-stack, integration IA, securite*
+Role : Developpement full-stack, integration IA, securite, audit log
 
 ---
 
-**ACHRAF MABROUK**  
+*ACHRAF MABROUK*  
 Etudiant en Licence IRM — FSTM  
 mabroukachraf.fstm@gmail.com  
-*Role : Developpement backend, base de donnees, jobs asynchrones*
+Role : Developpement backend, base de donnees, jobs asynchrones, export Excel
 
 ---
 
-Stage effectue chez **Soft Seven Art** — Casablanca, Maroc
+Stage effectue chez *Soft Seven Art* — Casablanca, Maroc
 
-**Encadrant entreprise :** M. Jail OTHMANE — Soft Seven Art  
-**Encadrant academique :** Pr. Noureddine MOUMKINE — FSTM  
+*Encadrant entreprise :* M. Jail OTHMANE — Soft Seven Art  
+*Encadrant academique :* Pr. Noureddine MOUMKINE — FSTM  
 Universite Hassan II de Casablanca
 
 </div>
@@ -363,6 +432,6 @@ Universite Hassan II de Casablanca
 
 <div align="center">
 
-*Projet realise dans le cadre du stage de fin d'etudes — Annee universitaire 2025-2026*
+Projet realise dans le cadre du stage de fin d'etudes — Annee universitaire 2025-2026
 
 </div>
