@@ -22,6 +22,7 @@
             <a href="{{ route('rapports.generate', $site) }}" class="btn-primary btn-sm" style="width:100%;">
                 <i class="fas fa-download"></i> Générer le rapport
             </a>
+        
         </div>
         @endforeach
     </div>
@@ -59,6 +60,7 @@
         </button>
         <x-export-button :route="route('export.rapports')" label="Exporter Rapports" />
     </form>
+    
 </div>
 
 {{-- ═══ Historique ═══ --}}

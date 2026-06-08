@@ -690,10 +690,12 @@
                     <i class="fas fa-chart-pie"></i> Statistiques
                 </a>
 
-                <a href="{{ route('audit.index') }}"
-                   class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
-                    <i class="fas fa-clock-rotate-left"></i> Historique d'audit
-                </a>
+                @if(auth()->user()->role === 'super_admin')
+    <a href="{{ route('audit.index') }}"
+       class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
+        <i class="fas fa-clock-rotate-left"></i> Historique d'audit
+    </a>
+@endif
 
                 <a href="{{ route('clients.index') }}"
                    class="nav-item {{ request()->routeIs('clients.*') ? 'active' : '' }}">
@@ -742,15 +744,16 @@
 {{-- ═════════ MAIN ═════════ --}}
 <div class="main">
     <div class="topbar">
-        <div>
-            <h1>@yield('title', 'Tableau de bord')</h1>
-            <div class="subtitle">@yield('subtitle', 'Système intelligent de monitoring')</div>
-        </div>
-        <div class="topbar-right">
-            <span class="live-badge"><span class="live-dot"></span> LIVE</span>
-            <span class="topbar-time" id="liveClock"></span>
-        </div>
+    <div>
+        <h1>@yield('title', 'Tableau de bord')</h1>
+        <div class="subtitle">@yield('subtitle', 'Système intelligent de monitoring')</div>
     </div>
+    <div class="topbar-right">
+        <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+        <span class="topbar-time" id="liveClock"></span>
+        <x-notification-bell />
+    </div>
+</div>
 
     <div class="content">
         @if(session('success'))

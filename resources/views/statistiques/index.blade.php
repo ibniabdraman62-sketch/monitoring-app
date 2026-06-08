@@ -1,403 +1,356 @@
-@extends('layouts.app')
+@extends('layouts.monitoring')
+@section('title', 'Statistiques globales')
+@section('subtitle', 'Vue exécutive consolidée sur 30 jours')
 
 @section('content')
-<div class="stats-page">
 
-    {{-- ═══ HEADER ═══ --}}
-    <div class="stats-header">
-        <div>
-            <h1 class="stats-title">
-                <span class="stats-title-icon">📊</span> Statistiques globales
-            </h1>
-            <p class="stats-subtitle">Vue exécutive du parc — données consolidées sur 30 jours</p>
+{{-- ═══ ALERTE SITES DOWN ═══ --}}
+@if($sitesDown->isNotEmpty())
+<div class="alert alert-error mb-24">
+    <i class="fas fa-triangle-exclamation"></i>
+    <div style="flex:1;">
+        <div style="font-weight:700; margin-bottom:6px;">
+            {{ $sitesDown->count() }} site(s) actuellement indisponible(s)
         </div>
-        <div class="stats-period-badge">
-            <span class="stats-period-dot"></span>
-            {{ now()->subDays(30)->format('d/m/Y') }} → {{ now()->format('d/m/Y') }}
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            @foreach($sitesDown as $s)
+                <a href="{{ route('sites.show', $s) }}"
+                   class="badge badge-danger" style="text-decoration:none;">
+                    <i class="fas fa-globe" style="font-size:9px;"></i>
+                    {{ $s->client_name ?? $s->name ?? $s->url }}
+                </a>
+            @endforeach
         </div>
     </div>
+</div>
+@endif
 
-    {{-- ═══ ALERTE SITES DOWN ═══ --}}
-    @if($sitesDown->isNotEmpty())
-        <div class="stats-alert">
-            <span class="stats-alert-icon">⚠️</span>
-            <div>
-                <strong>{{ $sitesDown->count() }} site(s) actuellement indisponible(s)</strong>
-                <div class="stats-alert-list">
-                    @foreach($sitesDown as $s)
-                        <a href="{{ route('sites.show', $s) }}">{{ $s->client_name ?? $s->name ?? $s->url }}</a>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    @endif
+{{-- ═══ KPIs ROW 1 (gradient cards) ═══ --}}
+<div class="kpi-grid mb-24">
+    <div class="kpi-card blue">
+        <div class="kpi-label">Sites monitorés</div>
+        <div class="kpi-value">{{ $kpis['sites_total'] }}</div>
+        <i class="fas fa-globe kpi-icon"></i>
+    </div>
+    <div class="kpi-card green">
+        <div class="kpi-label">Uptime moyen (30j)</div>
+        <div class="kpi-value">{{ $kpis['uptime_moyen'] }}%</div>
+        <i class="fas fa-heart-pulse kpi-icon"></i>
+    </div>
+    <div class="kpi-card red">
+        <div class="kpi-label">Incidents ce mois</div>
+        <div class="kpi-value">{{ $kpis['incidents_mois'] }}</div>
+        <i class="fas fa-triangle-exclamation kpi-icon"></i>
+    </div>
+    <div class="kpi-card gold">
+        <div class="kpi-label">Alertes envoyées</div>
+        <div class="kpi-value">{{ $kpis['alertes_mois'] }}</div>
+        <i class="fas fa-bell kpi-icon"></i>
+    </div>
+</div>
 
-    {{-- ═══ KPI ROW 1 ═══ --}}
-    <div class="stats-kpi-grid">
-        <div class="stats-kpi stats-kpi--gold">
-            <div class="stats-kpi-label">Sites monitorés</div>
-            <div class="stats-kpi-value">{{ $kpis['sites_total'] }}</div>
-            <div class="stats-kpi-hint">{{ $kpis['sites_actifs'] }} actifs</div>
+{{-- ═══ KPIs ROW 2 (cards neutres) ═══ --}}
+<div class="kpi-grid mb-24" style="grid-template-columns:repeat(4, 1fr);">
+    <div class="card" style="padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+            Clients
         </div>
-        <div class="stats-kpi stats-kpi--success">
-            <div class="stats-kpi-label">Uptime moyen (30j)</div>
-            <div class="stats-kpi-value">{{ $kpis['uptime_moyen'] }}%</div>
-            <div class="stats-kpi-hint">disponibilité globale</div>
+        <div style="font-size:28px; font-weight:700; color:var(--text); line-height:1;">
+            {{ $kpis['clients'] }}
         </div>
-        <div class="stats-kpi stats-kpi--warning">
-            <div class="stats-kpi-label">Incidents ce mois</div>
-            <div class="stats-kpi-value">{{ $kpis['incidents_mois'] }}</div>
-            <div class="stats-kpi-hint">depuis le {{ now()->startOfMonth()->format('d/m') }}</div>
+        <div class="text-xs text-muted" style="margin-top:4px;">comptes actifs</div>
+    </div>
+    <div class="card" style="padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+            Agents
         </div>
-        <div class="stats-kpi stats-kpi--info">
-            <div class="stats-kpi-label">Alertes envoyées</div>
-            <div class="stats-kpi-value">{{ $kpis['alertes_mois'] }}</div>
-            <div class="stats-kpi-hint">ce mois</div>
+        <div style="font-size:28px; font-weight:700; color:var(--text); line-height:1;">
+            {{ $kpis['agents'] }}
+        </div>
+        <div class="text-xs text-muted" style="margin-top:4px;">opérateurs</div>
+    </div>
+    <div class="card" style="padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+            Rapports générés
+        </div>
+        <div style="font-size:28px; font-weight:700; color:var(--text); line-height:1;">
+            {{ $kpis['rapports_mois'] }}
+        </div>
+        <div class="text-xs text-muted" style="margin-top:4px;">ce mois</div>
+    </div>
+    <div class="card" style="padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+            Vérifications totales
+        </div>
+        <div style="font-size:28px; font-weight:700; color:var(--text); line-height:1;">
+            {{ number_format($kpis['verifs_total'], 0, ',', ' ') }}
+        </div>
+        <div class="text-xs text-muted" style="margin-top:4px;">all-time</div>
+    </div>
+</div>
+
+{{-- ═══ CHARTS ROW 1 ═══ --}}
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px;">
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-chart-line" style="color:var(--primary);"></i>
+            Évolution du taux de disponibilité
+            <span class="badge badge-info" style="margin-left:auto;">30 jours</span>
+        </div>
+        <div style="position:relative; height:280px;">
+            <canvas id="chartUptime"></canvas>
         </div>
     </div>
-
-    {{-- ═══ KPI ROW 2 ═══ --}}
-    <div class="stats-kpi-grid">
-        <div class="stats-kpi">
-            <div class="stats-kpi-label">Clients</div>
-            <div class="stats-kpi-value">{{ $kpis['clients'] }}</div>
-            <div class="stats-kpi-hint">comptes actifs</div>
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-triangle-exclamation" style="color:var(--danger);"></i>
+            Incidents par type
+            <span class="badge badge-info" style="margin-left:auto;">30j</span>
         </div>
-        <div class="stats-kpi">
-            <div class="stats-kpi-label">Agents</div>
-            <div class="stats-kpi-value">{{ $kpis['agents'] }}</div>
-            <div class="stats-kpi-hint">opérateurs</div>
-        </div>
-        <div class="stats-kpi">
-            <div class="stats-kpi-label">Rapports générés</div>
-            <div class="stats-kpi-value">{{ $kpis['rapports_mois'] }}</div>
-            <div class="stats-kpi-hint">ce mois</div>
-        </div>
-        <div class="stats-kpi">
-            <div class="stats-kpi-label">Vérifications totales</div>
-            <div class="stats-kpi-value">{{ number_format($kpis['verifs_total'], 0, ',', ' ') }}</div>
-            <div class="stats-kpi-hint">all-time</div>
+        <div style="position:relative; height:280px;">
+            <canvas id="chartIncidents"></canvas>
         </div>
     </div>
+</div>
 
-    {{-- ═══ CHARTS ROW 1 ═══ --}}
-    <div class="stats-charts-row">
-        <div class="stats-card stats-card--wide">
-            <div class="stats-card-header">
-                <h3>📈 Évolution du taux de disponibilité</h3>
-                <span class="stats-card-badge">30 jours</span>
-            </div>
-            <canvas id="chartUptime" height="100"></canvas>
+{{-- ═══ CHARTS ROW 2 ═══ --}}
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px;">
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-bolt" style="color:var(--gold);"></i>
+            Activité des vérifications
+            <span class="badge badge-info" style="margin-left:auto;">7 jours</span>
         </div>
-        <div class="stats-card">
-            <div class="stats-card-header">
-                <h3>🚨 Incidents par type</h3>
-                <span class="stats-card-badge">30 jours</span>
-            </div>
-            <canvas id="chartIncidents" height="180"></canvas>
+        <div style="position:relative; height:280px;">
+            <canvas id="chartActivite"></canvas>
         </div>
     </div>
-
-    {{-- ═══ CHARTS ROW 2 ═══ --}}
-    <div class="stats-charts-row">
-        <div class="stats-card stats-card--wide">
-            <div class="stats-card-header">
-                <h3>⚡ Activité des vérifications</h3>
-                <span class="stats-card-badge">7 jours</span>
-            </div>
-            <canvas id="chartActivite" height="100"></canvas>
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-users" style="color:var(--primary);"></i>
+            Utilisateurs par rôle
         </div>
-        <div class="stats-card">
-            <div class="stats-card-header">
-                <h3>👥 Utilisateurs par rôle</h3>
-            </div>
-            <canvas id="chartUsers" height="180"></canvas>
+        <div style="position:relative; height:280px;">
+            <canvas id="chartUsers"></canvas>
         </div>
     </div>
+</div>
 
-    {{-- ═══ TABLES TOP SITES ═══ --}}
-    <div class="stats-tables-row">
-        <div class="stats-card">
-            <div class="stats-card-header">
-                <h3>🔴 Sites les plus instables</h3>
-                <span class="stats-card-badge">30 jours</span>
+{{-- ═══ TABLES TOP SITES (2 colonnes) ═══ --}}
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+
+    {{-- Top instables --}}
+    <div class="table-wrapper">
+        <div class="table-header">
+            <div class="card-title" style="margin:0;">
+                <i class="fas fa-circle-exclamation" style="color:var(--danger);"></i>
+                Sites les plus instables
             </div>
-            @if($topInstables->isEmpty())
-                <div class="stats-empty">Aucun incident enregistré 🎉</div>
-            @else
-                <table class="stats-table">
-                    <thead>
-                        <tr><th>#</th><th>Site</th><th class="stats-num">Incidents</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach($topInstables as $i => $s)
-                            <tr>
-                                <td><span class="stats-rank stats-rank--bad">{{ $i + 1 }}</span></td>
-                                <td>
-                                    <a href="{{ route('sites.show', $s) }}" class="stats-link">
-                                        {{ $s->client_name ?? $s->name ?? $s->url }}
-                                    </a>
-                                </td>
-                                <td class="stats-num"><strong class="stats-danger">{{ $s->incidents_count }}</strong></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
+            <span class="badge badge-info">30 jours</span>
         </div>
-
-        <div class="stats-card">
-            <div class="stats-card-header">
-                <h3>🟢 Sites les plus fiables</h3>
-                <span class="stats-card-badge">30 jours</span>
-            </div>
-            @if($topFiables->isEmpty())
-                <div class="stats-empty">Aucune donnée</div>
-            @else
-                <table class="stats-table">
-                    <thead>
-                        <tr><th>#</th><th>Site</th><th class="stats-num">Uptime</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach($topFiables as $i => $s)
-                            <tr>
-                                <td><span class="stats-rank stats-rank--good">{{ $i + 1 }}</span></td>
-                                <td>
-                                    <a href="{{ route('sites.show', $s) }}" class="stats-link">
-                                        {{ $s->client_name ?? $s->name ?? $s->url }}
-                                    </a>
-                                </td>
-                                <td class="stats-num"><strong class="stats-success">{{ $s->uptime_pct }}%</strong></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-        </div>
-    </div>
-
-    {{-- ═══ DERNIERS INCIDENTS ═══ --}}
-    <div class="stats-card">
-        <div class="stats-card-header">
-            <h3>🕐 Derniers incidents</h3>
-            <span class="stats-card-badge">5 plus récents</span>
-        </div>
-        @if($derniersIncidents->isEmpty())
-            <div class="stats-empty">Aucun incident à signaler ✨</div>
-        @else
-            <table class="stats-table">
+        <div class="table-scroll" style="max-height:320px;">
+            <table>
                 <thead>
-                    <tr><th>Site</th><th>Type</th><th>Début</th><th>Statut</th></tr>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Site</th>
+                        <th style="text-align:right;">Incidents</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    @foreach($derniersIncidents as $inc)
+                    @forelse($topInstables as $i => $s)
                         <tr>
                             <td>
-                                <a href="{{ route('sites.show', $inc->site) }}" class="stats-link">
-                                    {{ $inc->site->client_name ?? $inc->site->name ?? $inc->site->url ?? 'Site supprimé' }}
+                                <span class="badge badge-danger">{{ $i + 1 }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ route('sites.show', $s) }}"
+                                   style="color:var(--text); font-weight:600; text-decoration:none;">
+                                    {{ $s->client_name ?? $s->name ?? $s->url }}
                                 </a>
                             </td>
-                            <td><span class="stats-chip">{{ ucfirst($inc->type ?? 'incident') }}</span></td>
-                            <td>{{ optional($inc->started_at)->format('d/m/Y H:i') }}</td>
-                            <td>
-                                @if($inc->resolved_at ?? $inc->ended_at ?? false)
-                                    <span class="stats-badge stats-badge--success">Résolu</span>
-                                @else
-                                    <span class="stats-badge stats-badge--danger">En cours</span>
-                                @endif
+                            <td style="text-align:right;">
+                                <span class="badge badge-danger">{{ $s->incidents_count }}</span>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                <i class="fas fa-circle-check" style="font-size:24px; color:var(--success); display:block; margin-bottom:8px;"></i>
+                                Aucun incident enregistré
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
-        @endif
+        </div>
+    </div>
+
+    {{-- Top fiables --}}
+    <div class="table-wrapper">
+        <div class="table-header">
+            <div class="card-title" style="margin:0;">
+                <i class="fas fa-circle-check" style="color:var(--success);"></i>
+                Sites les plus fiables
+            </div>
+            <span class="badge badge-info">30 jours</span>
+        </div>
+        <div class="table-scroll" style="max-height:320px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Site</th>
+                        <th style="text-align:right;">Uptime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($topFiables as $i => $s)
+                        <tr>
+                            <td>
+                                <span class="badge badge-success">{{ $i + 1 }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ route('sites.show', $s) }}"
+                                   style="color:var(--text); font-weight:600; text-decoration:none;">
+                                    {{ $s->client_name ?? $s->name ?? $s->url }}
+                                </a>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge badge-success">{{ $s->uptime_pct }}%</span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Aucune donnée disponible
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>
 
-{{-- ═══ STYLES ═══ --}}
-<style>
-    .stats-page { padding: 24px; max-width: 1400px; margin: 0 auto; }
+{{-- ═══ DERNIERS INCIDENTS ═══ --}}
+<div class="table-wrapper">
+    <div class="table-header">
+        <div class="card-title" style="margin:0;">
+            <i class="fas fa-clock-rotate-left" style="color:var(--primary);"></i>
+            Derniers incidents enregistrés
+        </div>
+        <span class="badge badge-info">5 plus récents</span>
+    </div>
+    <div class="table-scroll" style="max-height:380px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Site</th>
+                    <th style="width:120px;">Type</th>
+                    <th style="width:150px;">Début</th>
+                    <th style="width:120px; text-align:center;">Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($derniersIncidents as $inc)
+                    <tr>
+                        <td>
+                            @if($inc->site)
+                                <a href="{{ route('sites.show', $inc->site) }}"
+                                   style="color:var(--text); font-weight:600; text-decoration:none;
+                                          display:inline-flex; align-items:center; gap:6px;">
+                                    <i class="fas fa-globe" style="color:var(--primary); font-size:11px;"></i>
+                                    {{ $inc->site->client_name ?? $inc->site->name ?? $inc->site->url }}
+                                </a>
+                            @else
+                                <span class="text-muted">Site supprimé</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge badge-neutral">
+                                {{ ucfirst($inc->type ?? 'incident') }}
+                            </span>
+                        </td>
+                        <td class="text-xs font-mono text-muted">
+                            {{ optional($inc->started_at)->format('d/m/Y H:i') }}
+                        </td>
+                        <td style="text-align:center;">
+                            @if(($inc->resolved_at ?? null) || ($inc->ended_at ?? null))
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check"></i> Résolu
+                                </span>
+                            @else
+                                <span class="badge badge-danger badge-dot">En cours</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <i class="fas fa-circle-check" style="font-size:30px; color:var(--success); display:block; margin-bottom:10px;"></i>
+                            Aucun incident à signaler ✨
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    .stats-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 28px; flex-wrap: wrap; gap: 16px;
-    }
-    .stats-title {
-        font-size: 28px; font-weight: 800; color: #1E3A5F;
-        margin: 0; display: flex; align-items: center; gap: 12px;
-    }
-    .stats-title-icon { font-size: 32px; }
-    .stats-subtitle { color: #64748b; margin: 4px 0 0; font-size: 14px; }
-    .stats-period-badge {
-        background: linear-gradient(135deg, #1E3A5F, #2c4a73);
-        color: #D4A857; padding: 10px 18px; border-radius: 999px;
-        font-size: 13px; font-weight: 600;
-        display: flex; align-items: center; gap: 10px;
-        box-shadow: 0 4px 12px rgba(30,58,95,0.2);
-    }
-    .stats-period-dot {
-        width: 8px; height: 8px; background: #D4A857; border-radius: 50%;
-        box-shadow: 0 0 8px #D4A857; animation: stats-pulse 2s infinite;
-    }
-    @keyframes stats-pulse {
-        0%,100% { opacity: 1; } 50% { opacity: 0.4; }
-    }
+@endsection
 
-    .stats-alert {
-        background: linear-gradient(135deg, #fef2f2, #fee2e2);
-        border-left: 4px solid #ef4444; border-radius: 12px;
-        padding: 16px 20px; margin-bottom: 24px;
-        display: flex; gap: 14px; align-items: flex-start;
-    }
-    .stats-alert-icon { font-size: 24px; }
-    .stats-alert strong { color: #991b1b; display: block; margin-bottom: 6px; }
-    .stats-alert-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .stats-alert-list a {
-        background: rgba(239,68,68,0.1); color: #991b1b;
-        padding: 4px 10px; border-radius: 6px; font-size: 13px;
-        text-decoration: none; font-weight: 500;
-    }
-    .stats-alert-list a:hover { background: rgba(239,68,68,0.2); }
-
-    .stats-kpi-grid {
-        display: grid; grid-template-columns: repeat(4, 1fr);
-        gap: 16px; margin-bottom: 20px;
-    }
-    .stats-kpi {
-        background: #fff; border-radius: 14px; padding: 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        transition: all .2s; position: relative; overflow: hidden;
-    }
-    .stats-kpi::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0;
-        height: 3px; background: #cbd5e1;
-    }
-    .stats-kpi:hover {
-        transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    }
-    .stats-kpi--gold::before    { background: linear-gradient(90deg, #D4A857, #f59e0b); }
-    .stats-kpi--success::before { background: linear-gradient(90deg, #10b981, #34d399); }
-    .stats-kpi--warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-    .stats-kpi--info::before    { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-    .stats-kpi-label {
-        font-size: 12px; text-transform: uppercase; letter-spacing: .5px;
-        color: #64748b; font-weight: 600; margin-bottom: 8px;
-    }
-    .stats-kpi-value {
-        font-size: 32px; font-weight: 800; color: #1E3A5F; line-height: 1;
-    }
-    .stats-kpi-hint {
-        font-size: 12px; color: #94a3b8; margin-top: 6px;
-    }
-
-    .stats-charts-row, .stats-tables-row {
-        display: grid; grid-template-columns: 2fr 1fr;
-        gap: 16px; margin-bottom: 20px;
-    }
-    .stats-tables-row { grid-template-columns: 1fr 1fr; }
-
-    .stats-card {
-        background: #fff; border-radius: 14px; padding: 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .stats-card-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 16px;
-    }
-    .stats-card-header h3 {
-        font-size: 15px; font-weight: 700; color: #1E3A5F; margin: 0;
-    }
-    .stats-card-badge {
-        background: rgba(212,168,87,0.12); color: #B8923D;
-        padding: 4px 10px; border-radius: 999px;
-        font-size: 11px; font-weight: 600;
-    }
-
-    .stats-table {
-        width: 100%; border-collapse: collapse; font-size: 14px;
-    }
-    .stats-table th {
-        text-align: left; padding: 10px 8px;
-        font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
-        color: #64748b; font-weight: 600;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    .stats-table td {
-        padding: 12px 8px; border-bottom: 1px solid #f1f5f9;
-    }
-    .stats-table tr:last-child td { border-bottom: none; }
-    .stats-num { text-align: right; }
-    .stats-link { color: #1E3A5F; text-decoration: none; font-weight: 500; }
-    .stats-link:hover { color: #D4A857; }
-    .stats-danger  { color: #ef4444; }
-    .stats-success { color: #10b981; }
-
-    .stats-rank {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 26px; height: 26px; border-radius: 50%;
-        font-size: 12px; font-weight: 700;
-    }
-    .stats-rank--bad  { background: #fee2e2; color: #991b1b; }
-    .stats-rank--good { background: #d1fae5; color: #065f46; }
-
-    .stats-chip {
-        background: #eef2ff; color: #4338ca;
-        padding: 3px 10px; border-radius: 6px;
-        font-size: 12px; font-weight: 600;
-    }
-    .stats-badge {
-        padding: 4px 10px; border-radius: 999px;
-        font-size: 11px; font-weight: 700;
-    }
-    .stats-badge--success { background: #d1fae5; color: #065f46; }
-    .stats-badge--danger  { background: #fee2e2; color: #991b1b; }
-
-    .stats-empty {
-        padding: 32px; text-align: center; color: #94a3b8; font-size: 14px;
-    }
-
-    @media (max-width: 1024px) {
-        .stats-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        .stats-charts-row, .stats-tables-row { grid-template-columns: 1fr; }
-    }
-</style>
-
-{{-- ═══ CHART.JS ═══ --}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+@section('scripts')
 <script>
 (function () {
-    const NAVY = '#1E3A5F', GOLD = '#D4A857';
-    const GREEN = '#10b981', RED = '#ef4444', BLUE = '#3b82f6', ORANGE = '#f59e0b', PURPLE = '#8b5cf6';
+    // Palette synchronisée avec le layout
+    const PRIMARY      = '#5B95C4';
+    const PRIMARY_DARK = '#4078A9';
+    const GOLD         = '#C9A876';
+    const SUCCESS      = '#4A8C5A';
+    const DANGER       = '#B66258';
+    const WARNING      = '#C48A4A';
+    const NEUTRAL      = '#8B7855';
+    const TEXT         = '#3D2F1F';
 
-    Chart.defaults.font.family = "'Inter', 'Poppins', system-ui, sans-serif";
-    Chart.defaults.color = '#475569';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#5C4B36';
 
-    // ─── Uptime evolution
+    // ─── Uptime evolution (ligne)
     new Chart(document.getElementById('chartUptime'), {
         type: 'line',
         data: {
             labels: @json($uptimeEvolution->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m'))),
             datasets: [{
-                label: 'Uptime (%)',
+                label: 'Uptime',
                 data: @json($uptimeEvolution->pluck('uptime')),
                 borderColor: GOLD,
-                backgroundColor: 'rgba(212,168,87,0.15)',
+                backgroundColor: 'rgba(201,168,118,0.15)',
                 tension: 0.35,
                 fill: true,
-                pointBackgroundColor: NAVY,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                pointBackgroundColor: PRIMARY_DARK,
+                pointRadius: 3.5,
+                pointHoverRadius: 5,
                 borderWidth: 2.5
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: TEXT,
+                    titleColor: '#FFF',
+                    bodyColor: '#FFF',
+                    padding: 10,
+                    cornerRadius: 6,
+                    callbacks: { label: ctx => ' ' + ctx.parsed.y + '%' }
+                }
+            },
             scales: {
-                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#F0E8D4' } },
                 x: { grid: { display: false } }
             }
         }
@@ -410,18 +363,22 @@
             labels: @json($incidentsParType->pluck('type')->map(fn($t) => ucfirst($t))),
             datasets: [{
                 data: @json($incidentsParType->pluck('count')),
-                backgroundColor: [RED, ORANGE, BLUE, PURPLE, GOLD],
-                borderWidth: 0
+                backgroundColor: [DANGER, WARNING, PRIMARY, GOLD, NEUTRAL],
+                borderWidth: 0,
+                hoverOffset: 6
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } } }
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 }, boxWidth: 10 } }
+            }
         }
     });
 
-    // ─── Activité 7 jours
+    // ─── Activité 7 jours (bar)
     new Chart(document.getElementById('chartActivite'), {
         type: 'bar',
         data: {
@@ -429,15 +386,20 @@
             datasets: [{
                 label: 'Vérifications',
                 data: @json($activite7j->pluck('count')),
-                backgroundColor: 'rgba(30,58,95,0.85)',
-                borderRadius: 8,
-                hoverBackgroundColor: GOLD
+                backgroundColor: PRIMARY,
+                hoverBackgroundColor: GOLD,
+                borderRadius: 6,
+                maxBarThickness: 40
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { x: { grid: { display: false } } }
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: '#F0E8D4' }, ticks: { precision: 0 } }
+            }
         }
     });
 
@@ -448,14 +410,18 @@
             labels: @json($usersParRole->pluck('role')->map(fn($r) => ucfirst($r))),
             datasets: [{
                 data: @json($usersParRole->pluck('count')),
-                backgroundColor: [NAVY, GOLD, GREEN, BLUE],
-                borderWidth: 0
+                backgroundColor: [PRIMARY_DARK, GOLD, SUCCESS, DANGER, NEUTRAL],
+                borderWidth: 0,
+                hoverOffset: 6
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } } }
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 }, boxWidth: 10 } }
+            }
         }
     });
 })();

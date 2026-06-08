@@ -56,7 +56,7 @@
     .notif-bell__panel {
         position: absolute; top: calc(100% + 10px); right: 0;
         width: 380px; max-width: calc(100vw - 30px);
-        background: #1E3A5F; color: #e2e8f0;
+        background: #1e505f; color: #e2e8f0;
         border: 1px solid rgba(212,168,87,0.2); border-radius: 14px;
         box-shadow: 0 18px 50px rgba(0,0,0,0.45);
         z-index: 1050; overflow: hidden;

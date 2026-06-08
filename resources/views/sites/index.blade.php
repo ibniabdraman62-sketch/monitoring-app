@@ -26,6 +26,7 @@
         <button type="submit" class="btn-primary btn-sm">
             <i class="fas fa-filter"></i> Filtrer
         </button>
+        <x-export-button :route="route('export.sites')" label="Exporter Sites" />
         @if(request('search') || request('statut'))
             <a href="{{ route('sites.index') }}" class="btn-secondary btn-sm">Réinitialiser</a>
         @endif
@@ -35,10 +36,8 @@
     <a href="{{ route('sites.create') }}" class="btn-primary">
         <i class="fas fa-plus"></i> Ajouter un site
     </a>
-
-    <x-export-button :route="route('export.sites')" label="Exporter Sites" />
 @endif
-
+</div>
 {{-- ═══ Table des sites ═══ --}}
 <div class="table-wrapper">
     <div class="table-header">

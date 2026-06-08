@@ -54,6 +54,8 @@ Route::prefix('export')->name('export.')->group(function () {
             'email_verified_at' => now(),
         ]);
 
+        \App\Services\AuditService::log('user_created', 'user', "Création rapide du client « {$client->name} » ({$client->email}) depuis formulaire site", $client);
+
         $emailSent = false;
         $emailError = null;
         try {
@@ -308,6 +310,7 @@ Route::prefix('export')->name('export.')->group(function () {
                 'is_active'         => true,
                 'email_verified_at' => now(),
             ]);
+            \App\Services\AuditService::log('user_created', 'user', "Création du client « {$client->name} » ({$client->email})", $client);
 
             try {
                 \Illuminate\Support\Facades\Mail::to($client->email)
@@ -328,6 +331,7 @@ Route::prefix('export')->name('export.')->group(function () {
                 'email' => 'required|email|unique:users,email,' . $client->id,
             ]);
             $client->update($validated);
+            \App\Services\AuditService::log('user_updated', 'user', "Modification du client « {$client->name} »", $client, [], $validated);
             return redirect()->route('clients.index')->with('success', 'Client modifié.');
         })->name('clients.update');
 
@@ -335,6 +339,7 @@ Route::prefix('export')->name('export.')->group(function () {
             if ($client->role !== 'client') abort(404);
             $validated = $request->validate(['password' => 'required|string|min:8']);
             $client->update(['password' => bcrypt($validated['password'])]);
+            \App\Services\AuditService::log('password_reset_admin', 'user', "Réinitialisation du mot de passe du client « {$client->name} »", $client);
             try {
                 \Illuminate\Support\Facades\Mail::to($client->email)
                     ->send(new \App\Mail\ClientWelcomeMail($client, $validated['password']));
@@ -347,6 +352,8 @@ Route::prefix('export')->name('export.')->group(function () {
         Route::patch('/clients/{client}/toggle', function (\App\Models\User $client) {
             if ($client->role !== 'client') abort(404);
             $client->update(['is_active' => !$client->is_active]);
+            $statusLabel = $client->is_active ? 'activé' : 'désactivé';
+\App\Services\AuditService::log($client->is_active ? 'user_activated' : 'user_deactivated', 'user', "Compte du client « {$client->name} » {$statusLabel}", $client);
             return redirect()->route('clients.index')
                 ->with('success', $client->is_active ? 'Client activé.' : 'Client désactivé.');
         })->name('clients.toggle');
@@ -354,6 +361,7 @@ Route::prefix('export')->name('export.')->group(function () {
         Route::delete('/clients/{client}', function (\App\Models\User $client) {
             if ($client->role !== 'client') abort(404);
             $name = $client->name;
+            \App\Services\AuditService::log('user_deleted', 'user', "Suppression du client « {$client->name} » ({$client->email})", $client);
             $client->delete();
             return redirect()->route('clients.index')->with('success', "Client '{$name}' supprimé.");
         })->name('clients.destroy');
@@ -488,7 +496,7 @@ Route::prefix('export')->name('export.')->group(function () {
                 'errors_count'  => $exitCode === 0 ? 0 : 1,
                 'executed_at'   => now(),
             ]);
-
+            \App\Services\AuditService::log('cron_run', 'system', "Exécution manuelle de la commande « {$command} » — " . ($exitCode === 0 ? 'succès' : 'erreur') . " ({$durationMs}ms)");
             return back()->with('success', "Commande {$command} exécutée en {$durationMs}ms");
         })->name('cron.run');
 
