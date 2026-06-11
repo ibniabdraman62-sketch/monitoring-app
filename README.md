@@ -356,9 +356,9 @@ ngrok http --host-header=rewrite monitoring-app.test:80
 
 | Rôle | Email | Mot de passe | Accès |
 |---|---|---|---|
-| Super Administrateur | admin@softseven.ma | SoftSeven@2026 | Complet |
-| Agent | agent@softseven.ma | Agent@2026 | Opérationnel |
-| Client (exemple) | client@test.ma | Client@2026 | Consultation seule |
+| Super Administrateur | admin@softseven.ma | `**********` | Complet |
+| Agent | agent@softseven.ma | `**********` | Opérationnel |
+| Client (exemple) | client@test.ma | `**********` | Consultation seule |
 
 > Les clients sont créés depuis **Gestion Clients** ou lors de l'ajout d'un site via le bouton **"Nouveau client"** dans le formulaire.
 
@@ -465,7 +465,7 @@ php artisan tinker
 
 <div align="center">
 
-📅 *Projet réalisé dans le cadre du stage de fin d'études — Année universitaire 2025–2026*
+ *Projet réalisé dans le cadre du stage de fin d'études — Année universitaire 2025–2026*
 
 [![GitHub](https://img.shields.io/badge/GitHub-ibniabdraman62--sketch-1E3A5F?style=flat-square&logo=github)](https://github.com/ibniabdraman62-sketch/monitoring-app)
 
