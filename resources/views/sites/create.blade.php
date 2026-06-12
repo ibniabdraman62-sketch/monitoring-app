@@ -8,7 +8,7 @@
     <i class="fas fa-arrow-left"></i> Retour à la liste
 </a>
 
-<div style="max-width:720px; margin:0 auto;">
+<div >  
     <div class="card">
         <div class="card-title">
             <i class="fas fa-plus-circle" style="color:var(--primary);"></i>

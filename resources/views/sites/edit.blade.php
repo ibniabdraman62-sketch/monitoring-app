@@ -9,7 +9,7 @@
 </a>
 
 {{-- ═══ FORMULAIRE CENTRÉ ═══ --}}
-<div style="max-width:720px; margin:0 auto;">
+<div > 
     <div class="card">
         <div class="card-title">
             <i class="fas fa-edit" style="color:var(--primary);"></i>

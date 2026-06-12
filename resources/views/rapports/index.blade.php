@@ -56,9 +56,12 @@
                 placeholder="destinataire@exemple.com" required>
         </div>
         <button type="submit" class="btn-primary btn-gold">
-            <i class="fas fa-paper-plane"></i> Envoyer
-        </button>
-        <x-export-button :route="route('export.rapports')" label="Exporter Rapports" />
+    <i class="fas fa-paper-plane"></i> Envoyer
+</button>
+
+<div style="grid-column:1 / -1; text-align:center; margin-top:10px;">
+    <x-export-button :route="route('export.rapports')" label="Exporter Rapports"/>
+</div>
     </form>
     
 </div>

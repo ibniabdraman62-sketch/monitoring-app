@@ -23,7 +23,5 @@ class AlerteLecture extends Model
     {
         return $this->belongsTo(Alerte::class);
     }
-    public function site() {
-        return $this->belongsTo(Site::class);
-    }
+    
 }

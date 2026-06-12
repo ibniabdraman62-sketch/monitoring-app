@@ -23,7 +23,7 @@
             <div class="notif-bell__empty">Chargement…</div>
         </div>
 
-        <a href="{{ route('alertes.index') }}" class="notif-bell__footer">
+        <a href="{{ route('alertes.index') }}" class="notif-bell__footer" id="notif-voir-tout">
             Voir toutes les alertes →
         </a>
     </div>
@@ -56,7 +56,7 @@
     .notif-bell__panel {
         position: absolute; top: calc(100% + 10px); right: 0;
         width: 380px; max-width: calc(100vw - 30px);
-        background: #1e505f; color: #e2e8f0;
+        background: linear-gradient(180deg, #2C5F8B 70%, #4078A9 100%); color: #e2e8f0;
         border: 1px solid rgba(212,168,87,0.2); border-radius: 14px;
         box-shadow: 0 18px 50px rgba(0,0,0,0.45);
         z-index: 1050; overflow: hidden;
@@ -72,8 +72,8 @@
         width: 8px; height: 8px; border-radius: 50%; background: #D4A857;
         box-shadow: 0 0 8px rgba(212,168,87,0.6);
     }
-    .notif-bell__mark-all {
-        background: none; border: none; color: #94a3b8;
+    .notif-bell__mark-all { 
+        background: none; border: none; color: #e2e8f0;
         font-size: 12px; cursor: pointer; padding: 0;
     }
     .notif-bell__mark-all:hover { color: #D4A857; text-decoration: underline; }
@@ -101,14 +101,14 @@
     .notif-item__icon--warning { background: rgba(245,158,11,0.15); color: #f59e0b; }
     .notif-item__icon--info    { background: rgba(59,130,246,0.15); color: #3b82f6; }
     .notif-item__body { flex: 1; min-width: 0; }
-    .notif-item__site { font-weight: 600; font-size: 13px; color: #f1f5f9; }
+    .notif-item__site { font-weight: 600; font-size: 13px; color: #ffffff; }
     .notif-item__msg {
-        font-size: 12px; color: #94a3b8;
+        font-size: 12px; color: #e2e8f0;
         overflow: hidden; text-overflow: ellipsis;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         margin: 2px 0;
     }
-    .notif-item__date { font-size: 11px; color: #64748b; }
+    .notif-item__date { font-size: 11px; color: #cbd5e1; }
     .notif-bell__empty {
         padding: 32px 16px; text-align: center; color: #64748b; font-size: 13px;
     }
@@ -173,7 +173,11 @@
             return;
         }
         list.innerHTML = alertes.map(a => `
-            <a href="${escapeHtml(a.url)}" class="notif-item ${a.lue ? '' : 'notif-item--unread'}">
+             
+            <a href="${escapeHtml(a.url)}" 
+   class="notif-item ${a.lue ? '' : 'notif-item--unread'}"
+   onclick="marquerLueEtRediriger(event, ${a.id}, '${escapeHtml(a.url)}')">
+
                 <span class="notif-item__icon ${iconClass(a.severite)}">${iconChar(a.severite)}</span>
                 <div class="notif-item__body">
                     <div class="notif-item__site">${escapeHtml(a.site)}</div>
@@ -220,8 +224,12 @@
     });
 
     document.addEventListener('click', (e) => {
-        if (!bell.contains(e.target)) panel.hidden = true;
-    });
+    if (!bell.contains(e.target)) panel.hidden = true;
+});
+
+bell.addEventListener('mouseleave', () => {
+    setTimeout(() => { panel.hidden = true; }, 300);
+});
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') panel.hidden = true;
@@ -232,9 +240,55 @@
         markAllRead();
     });
 
+    async function marquerLueEtRediriger(e, id, url) {
+    e.preventDefault();
+    try {
+        const lueUrl = "{{ url('/') }}/notifications/" + id + "/lue";
+        console.log('URL appelée:', lueUrl); // Pour déboguer
+        const response = await fetch(lueUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        console.log('Réponse:', response.status); // Pour déboguer
+        await load();
+    } catch(err) {
+        console.error('Erreur:', err);
+    }
+    window.location.href = url;
+}
+//             method: 'POST',
+//             headers: {
+//                 'X-CSRF-TOKEN': csrf,
+//                 'Accept': 'application/json',
+//                 'X-Requested-With': 'XMLHttpRequest'
+//             }
+//         });
+//         await load(); // Rafraîchit le badge
+//     } catch(e) {}
+//     window.location.href = url; // Redirige après
+// }
+
+
     // Init + polling toutes les 30s
     load();
     setInterval(load, 30000);
+
+    document.getElementById('notif-voir-tout').addEventListener('click', async (e) => {
+    await fetch(urls.markAll, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+    });
+    setBadge(0);
+});
+
 })();
 </script>
 @endonce
