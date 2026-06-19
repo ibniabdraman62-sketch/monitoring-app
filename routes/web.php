@@ -130,11 +130,11 @@ Route::prefix('export')->name('export.')->group(function () {
                 'X-Title'       => 'MonitorPro — Soft Seven Art',
                 'Content-Type'  => 'application/json',
             ])->timeout(30)->post('https://openrouter.ai/api/v1/chat/completions', [
-                'model'    => 'google/gemini-2.5-flash',
+                'model' => 'anthropic/claude-opus-4.8-fast', // ou un autre modèle disponible
                 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user',   'content' => $message],
-                ],
+                ], 
                 'max_tokens'  => 1000,
                 'temperature' => 0.7,
             ]);
